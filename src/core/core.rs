@@ -1,6 +1,8 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 
 use eframe::egui;
 
@@ -10,24 +12,31 @@ use crate::core::ui::draw_entry::draw_entry;
 use crate::core::utils::utils::read_current_folder;
 use crate::store;
 
+#[derive(Debug, Clone)]
+pub struct Counter {
+    pub counter: usize,
+}
+
 store! {
+    #[derive(Debug)]
     pub struct ActionsStore {
-        items: Vec<String> = Vec::new(),
+        items: Vec<Counter> = vec![Counter{counter:1}, Counter{counter:2}],
         counter: u32 = 0,
     }
 
-    get_all_items(&self) {
-        // self здесь — аргумент метода
-        let new_items = vec!["Item 1".to_string(), "Item 2".to_string()];
-        self.items.set(new_items);
+    increment(&self, ctx: &egui::Context) {
+        let val = self.counter.get(ctx).clone();
+        self.counter.set(val + 1, ctx);
     }
 
-    increment(&self, ctx: &egui::Context) {
-        let val = self.counter.get(ctx);
-        self.counter.set(val + 1);
+    update_item(&self, ctx: &egui::Context, i: usize) {
+        self.items.update(ctx, |items| {
+            if let Some(elem) = items.get_mut(i) {
+                elem.counter += 1;
+            }
+        });
     }
 }
-
 // Структура приложения
 pub struct MyApp {
     current_dir: PathBuf,
@@ -35,14 +44,14 @@ pub struct MyApp {
     icons: IconStore,
     opened_file: Option<PathBuf>,
     opened_text: String,
-    actions_store: ActionsStore,
+    actions_store: Rc<RefCell<ActionsStore>>,
 }
 
 impl MyApp {
     pub fn new(icons: IconStore, opened_file: Option<PathBuf>, opened_text: String) -> Self {
         let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
         let files = read_current_folder(&current_dir);
-        let actions_store = ActionsStore::new();
+        let actions_store = Rc::new(RefCell::new(ActionsStore::new()));
 
         Self {
             current_dir,
@@ -65,9 +74,7 @@ impl MyApp {
 // Реализация интерфейса
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let store = &self.actions_store;
-        store.get_all_items();
-        let items = store.items.get(ctx);
+        let store = self.actions_store.clone();
 
         egui::SidePanel::left("left_panel")
             .resizable(true)
@@ -100,8 +107,12 @@ impl eframe::App for MyApp {
                 ui.heading(path.file_name().unwrap().to_string_lossy());
                 ui.separator();
 
-                for item in items.iter() {
-                    ui.label(item); // теперь borrow ui безопасен
+                for (i, elem) in store.borrow().items.get(ctx).iter().enumerate() {
+                    let text = format!("{:?}", elem.counter);
+
+                    if ui.button(text).clicked() {
+                        store.borrow().update(ctx, i);
+                    }
                 }
 
                 egui::ScrollArea::vertical().show(ui, |ui| {

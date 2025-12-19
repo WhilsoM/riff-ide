@@ -6,3 +6,5 @@ edition = "2024"
 [dependencies]
 eframe = "0.33.3"
 image = "0.25.9"
+syn = { version = "2.0", features = ["full"] }
+quote = "1.0"

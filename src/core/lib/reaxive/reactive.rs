@@ -1,11 +1,11 @@
+use eframe::egui;
 use std::{
     cell::RefCell,
     rc::{Rc, Weak},
 };
 
-use eframe::egui;
-
-#[derive(Default)]
+/// Observer для подписки на изменения
+#[derive(Default, Debug)]
 pub struct Observer {
     subscribers: RefCell<Vec<Weak<dyn Fn()>>>,
 }
@@ -30,7 +30,8 @@ impl Observer {
         self.subscribers.borrow_mut().push(Rc::downgrade(&cb));
     }
 }
-
+#[derive(Debug)]
+/// Реактивное поле
 pub struct ReField<T> {
     value: RefCell<T>,
     observer: Observer,
@@ -44,6 +45,7 @@ impl<T> ReField<T> {
         }
     }
 
+    /// Чтение значения (подписка на repaint)
     pub fn get(&self, ctx: &egui::Context) -> T
     where
         T: Clone,
@@ -54,8 +56,18 @@ impl<T> ReField<T> {
         self.value.borrow().clone()
     }
 
+    /// Изменение значения
     pub fn set(&self, value: T) {
         *self.value.borrow_mut() = value;
         self.observer.notify();
+    }
+
+    /// Доступ к RefCell для ручной работы
+    pub fn borrow(&self) -> std::cell::Ref<'_, T> {
+        self.value.borrow()
+    }
+
+    pub fn borrow_mut(&self) -> std::cell::RefMut<'_, T> {
+        self.value.borrow_mut()
     }
 }
