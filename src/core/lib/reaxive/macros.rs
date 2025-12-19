@@ -5,24 +5,62 @@ macro_rules! store {
         $vis:vis struct $name:ident {
             $($fname:ident : $ftype:ty = $default:expr),* $(,)?
         }
-        $($method_name:ident (&self $(, $arg:ident : $arg_type:ty)*) $body:block)*
+        $(
+            $method_name:ident ($($params:tt)*) $body:block
+        )*
     ) => {
         $(#[$struct_meta])*
         $vis struct $name {
             $(pub $fname: crate::core::lib::reaxive::reactive::ReField<$ftype>),*
         }
 
+        pub struct ReactiveAccess<'a> {
+            store: &'a $name,
+            ctx: &'a eframe::egui::Context,
+            _changed: std::cell::Cell<bool>,
+        }
+
         impl $name {
-            /// Конструктор: автоматически делает все поля реактивными
             pub fn new() -> Self {
                 Self {
                     $($fname: crate::core::lib::reaxive::reactive::ReField::new($default)),*
                 }
             }
 
+            pub fn reactive<'a>(&'a self, ctx: &'a eframe::egui::Context) -> ReactiveAccess<'a> {
+                ReactiveAccess {
+                    store: self,
+                    ctx,
+                    _changed: std::cell::Cell::new(false),
+                }
+            }
+
             $(
-                pub fn $method_name(&self $(, $arg : $arg_type)*) $body
+                pub fn $method_name ($($params)*) $body
             )*
+        }
+
+        impl<'a> ReactiveAccess<'a> {
+            $(
+                pub fn $fname(&mut self) -> std::cell::RefMut<'a, $ftype> {
+                    let ctx = self.ctx.clone();
+                    let cb = std::rc::Rc::new(move || ctx.request_repaint());
+                    self.store.$fname.observer.subscribe(cb);
+                    self._changed.set(true);
+                    self.store.$fname.borrow_mut()
+                }
+            )*
+        }
+
+        impl<'a> Drop for ReactiveAccess<'a> {
+            fn drop(&mut self) {
+                if self._changed.get() {
+                    $(
+                        self.store.$fname.observer.notify();
+                    )*
+                    self.ctx.request_repaint();
+                }
+            }
         }
     };
 }

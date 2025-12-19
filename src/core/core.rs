@@ -20,24 +20,23 @@ pub struct Counter {
 store! {
     #[derive(Debug)]
     pub struct ActionsStore {
-        items: Vec<Counter> = vec![Counter{counter:1}, Counter{counter:2}],
+        items: Vec<Counter> = vec![Counter{counter:1}, Counter{counter:2}, Counter{counter:3}],
         counter: u32 = 0,
     }
 
     increment(&self, ctx: &egui::Context) {
-        let val = self.counter.get(ctx).clone();
-        self.counter.set(val + 1, ctx);
+        let mut reactive = self.reactive(ctx);
+        *reactive.counter() += 1;
     }
 
     update_item(&self, ctx: &egui::Context, i: usize) {
-        self.items.update(ctx, |items| {
-            if let Some(elem) = items.get_mut(i) {
-                elem.counter += 1;
-            }
-        });
+        let mut reactive = self.reactive(ctx);
+        if let Some(elem) = reactive.items().get_mut(i) {
+            elem.counter += 1;
+        }
     }
 }
-// Структура приложения
+
 pub struct MyApp {
     current_dir: PathBuf,
     files: Vec<Entry>,
@@ -71,7 +70,6 @@ impl MyApp {
     }
 }
 
-// Реализация интерфейса
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let store = self.actions_store.clone();
@@ -107,11 +105,12 @@ impl eframe::App for MyApp {
                 ui.heading(path.file_name().unwrap().to_string_lossy());
                 ui.separator();
 
-                for (i, elem) in store.borrow().items.get(ctx).iter().enumerate() {
+                let items = store.borrow().items.get(ctx);
+                for (i, elem) in items.iter().enumerate() {
                     let text = format!("{:?}", elem.counter);
 
                     if ui.button(text).clicked() {
-                        store.borrow().update(ctx, i);
+                        store.borrow().update_item(ctx, i);
                     }
                 }
 
