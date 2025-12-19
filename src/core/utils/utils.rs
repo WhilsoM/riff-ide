@@ -3,8 +3,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use eframe::egui;
+
 use crate::core::{enums::enums::FileType, models::Entry};
 
+/// читать текущую директорию
+/// TODO: сделать функцию выбирание папки для чтения
 pub fn read_current_folder(path: &PathBuf) -> Vec<Entry> {
     let mut entries: Vec<Entry> = Vec::new();
     if let Ok(dir_entries) = fs::read_dir(path) {
@@ -36,6 +40,7 @@ pub fn read_current_folder(path: &PathBuf) -> Vec<Entry> {
     entries
 }
 
+/// получить текст из типа файла
 pub fn file_type_label(ftype: &FileType) -> &str {
     match ftype {
         FileType::Folder => "Папка",
@@ -44,6 +49,7 @@ pub fn file_type_label(ftype: &FileType) -> &str {
     }
 }
 
+/// загрузка детей (дерево)
 pub fn load_children(entry: &mut Entry) {
     if entry.ftype != FileType::Folder {
         return;
@@ -57,6 +63,7 @@ pub fn load_children(entry: &mut Entry) {
     entry.children = read_current_folder(&entry.path);
 }
 
+/// получение типа файла
 pub fn get_file_type(path: &Path) -> FileType {
     if let Ok(metadata) = fs::metadata(path) {
         let ft = metadata.file_type();
@@ -69,4 +76,16 @@ pub fn get_file_type(path: &Path) -> FileType {
         }
     }
     FileType::File
+}
+
+/// функция для загрузки иконок (icons_store.rs)
+pub fn load_icon(ctx: &egui::Context, name: &str, bytes: &[u8]) -> egui::TextureHandle {
+    let image = image::load_from_memory(bytes).unwrap().to_rgba8();
+
+    let size = [image.width() as usize, image.height() as usize];
+    let pixels = image.into_raw();
+
+    let color_image = egui::ColorImage::from_rgba_unmultiplied(size, &pixels);
+
+    ctx.load_texture(name, color_image, Default::default())
 }

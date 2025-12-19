@@ -5,7 +5,7 @@ use std::{
     rc::{Rc, Weak},
 };
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Observer {
     subscribers: RefCell<Vec<Weak<dyn Fn()>>>,
 }
@@ -30,7 +30,7 @@ impl Observer {
         self.subscribers.borrow_mut().push(Rc::downgrade(&cb));
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ReField<T> {
     value: RefCell<T>,
     pub(crate) observer: Observer,

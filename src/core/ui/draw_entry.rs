@@ -1,8 +1,8 @@
-use eframe::egui;
+use eframe::egui::{self};
 
 use crate::core::{
-    core::IconStore,
     enums::enums::{FileType, Icon, UiAction},
+    icons_store::IconStore,
     models::Entry,
     utils::utils::read_current_folder,
 };
@@ -14,6 +14,7 @@ pub fn draw_entry(
     indent: usize,
 ) -> Option<UiAction> {
     let mut action = None;
+
     ui.horizontal(|ui| {
         ui.add_space((indent * 12) as f32);
 
@@ -27,7 +28,7 @@ pub fn draw_entry(
 
         let name = entry.path.file_name().unwrap().to_string_lossy();
 
-        if ui.selectable_label(false, name).clicked() {
+        if ui.selectable_label(false, name.clone()).clicked() {
             match entry.ftype {
                 FileType::Folder => {
                     entry.is_open = !entry.is_open;
