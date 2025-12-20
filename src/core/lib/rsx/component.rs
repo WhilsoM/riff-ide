@@ -1,4 +1,5 @@
 use eframe::egui;
+use std::rc::Rc;
 
 pub trait Component {
     fn render(&self, ui: &mut egui::Ui);
@@ -18,16 +19,16 @@ impl<'a> RenderContext<'a> {
 pub enum Children {
     #[default]
     None,
-    Single(Box<dyn Component>),
-    Multiple(Vec<Box<dyn Component>>),
+    Single(Rc<dyn Component>),
+    Multiple(Vec<Rc<dyn Component>>),
 }
 
 impl Clone for Children {
     fn clone(&self) -> Self {
         match self {
             Children::None => Children::None,
-            Children::Single(_) => Children::None,
-            Children::Multiple(_) => Children::None,
+            Children::Single(child) => Children::Single(child.clone()),
+            Children::Multiple(children) => Children::Multiple(children.clone()),
         }
     }
 }
@@ -43,6 +44,18 @@ impl Children {
                 }
             }
         }
+    }
+}
+
+impl From<Rc<dyn Component>> for Children {
+    fn from(component: Rc<dyn Component>) -> Self {
+        Children::Single(component)
+    }
+}
+
+impl From<Vec<Rc<dyn Component>>> for Children {
+    fn from(components: Vec<Rc<dyn Component>>) -> Self {
+        Children::Multiple(components)
     }
 }
 

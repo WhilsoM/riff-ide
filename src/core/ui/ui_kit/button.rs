@@ -5,13 +5,24 @@ pub struct Button {
     pub props: ButtonProps,
 }
 
-#[derive(Default)]
 pub struct ButtonProps {
     pub text: String,
     pub on_click: Option<std::rc::Rc<dyn Fn()>>,
     pub children: Children,
     pub enabled: bool,
     pub style: Option<ButtonStyle>,
+}
+
+impl Default for ButtonProps {
+    fn default() -> Self {
+        Self {
+            text: String::new(),
+            on_click: None,
+            children: Children::None,
+            enabled: true,
+            style: None,
+        }
+    }
 }
 
 impl Clone for ButtonProps {

@@ -1,7 +1,11 @@
 pub mod button;
 pub mod central_panel;
+pub mod image;
+pub mod list;
 pub mod scroll_area;
+pub mod selectable_label;
 pub mod separator;
+pub mod spacer;
 pub mod style;
 pub mod text;
 pub mod text_edit;
@@ -9,8 +13,12 @@ pub mod view;
 
 pub use button::Button;
 pub use central_panel::{render_central_panel, CentralPanel};
+pub use image::Image;
+pub use list::List;
 pub use scroll_area::ScrollArea;
+pub use selectable_label::SelectableLabel;
 pub use separator::Separator;
+pub use spacer::Spacer;
 pub use style::{Style, StyleSheet};
 pub use text::Text;
 pub use text_edit::TextEdit;

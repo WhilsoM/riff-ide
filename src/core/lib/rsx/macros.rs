@@ -1,26 +1,100 @@
 #[macro_export]
 macro_rules! rsx {
     ($text:literal) => {
-        $crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
-            ui.label($text);
-        })
+        {
+            use std::rc::Rc;
+            Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+                ui.label($text);
+            })) as Rc<dyn $crate::core::lib::rsx::component::Component>
+        }
     };
 
     ($component:ident ( $($args:expr),* $(,)? )) => {
         {
+            use std::rc::Rc;
             let component = $component($($args),*);
-            $crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+            Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+                use $crate::core::lib::rsx::component::Component;
                 component.render(ui);
-            })
+            })) as Rc<dyn $crate::core::lib::rsx::component::Component>
         }
     };
 
     ($component:ident {}) => {
         {
+            use std::rc::Rc;
             let component = $component::new();
-            $crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+            Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+                use $crate::core::lib::rsx::component::Component;
                 component.render(ui);
-            })
+            })) as Rc<dyn $crate::core::lib::rsx::component::Component>
+        }
+    };
+
+    (<> $($children:tt)* </>) => {
+        {
+            use std::rc::Rc;
+            let children_vec = $crate::rsx_parse_children!($($children)*);
+            Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+                use $crate::core::lib::rsx::component::Component;
+                for child in &children_vec {
+                    child.render(ui);
+                }
+            })) as Rc<dyn $crate::core::lib::rsx::component::Component>
+        }
+    };
+
+    (if ($condition:expr) { $($content:tt)* }) => {
+        {
+            use std::rc::Rc;
+            if $condition {
+                $crate::rsx!($($content)*)
+            } else {
+                Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(|_ui: &mut eframe::egui::Ui| {})) as Rc<dyn $crate::core::lib::rsx::component::Component>
+            }
+        }
+    };
+
+    (if ($condition:expr) { $($content_if:tt)* } else { $($content_else:tt)* }) => {
+        {
+            use std::rc::Rc;
+            if $condition {
+                $crate::rsx!($($content_if)*)
+            } else {
+                $crate::rsx!($($content_else)*)
+            }
+        }
+    };
+
+    (for $item:ident in ($array:expr) { $($content:tt)* }) => {
+        {
+            use std::rc::Rc;
+            let mut children = vec![];
+            for $item in $array {
+                children.push($crate::rsx!($($content)*));
+            }
+            Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+                use $crate::core::lib::rsx::component::Component;
+                for child in &children {
+                    child.render(ui);
+                }
+            })) as Rc<dyn $crate::core::lib::rsx::component::Component>
+        }
+    };
+
+    (for ($idx:ident, $item:ident) in ($array:expr) { $($content:tt)* }) => {
+        {
+            use std::rc::Rc;
+            let mut children = vec![];
+            for ($idx, $item) in $array.iter().enumerate() {
+                children.push($crate::rsx!($($content)*));
+            }
+            Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+                use $crate::core::lib::rsx::component::Component;
+                for child in &children {
+                    child.render(ui);
+                }
+            })) as Rc<dyn $crate::core::lib::rsx::component::Component>
         }
     };
 
@@ -45,13 +119,15 @@ macro_rules! rsx_parse_component {
         }
     ) => {
         {
+            use std::rc::Rc;
             let mut props = <$component as $crate::core::lib::rsx::component::ComponentWithProps>::Props::default();
             let children_vec = $crate::rsx_parse_children!($($child)*);
             props.children = $crate::core::lib::rsx::component::Children::Multiple(children_vec);
             let component = $component::new_with_props(props);
-            $crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+            Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+                use $crate::core::lib::rsx::component::Component;
                 component.render(ui);
-            })
+            })) as Rc<dyn $crate::core::lib::rsx::component::Component>
         }
     };
 
@@ -60,12 +136,14 @@ macro_rules! rsx_parse_component {
         $($rest:tt)*
     ) => {
         {
+            use std::rc::Rc;
             let mut props = <$component as $crate::core::lib::rsx::component::ComponentWithProps>::Props::default();
             $crate::rsx_parse_props!(props, $($rest)*);
             let component = $component::new_with_props(props);
-            $crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+            Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+                use $crate::core::lib::rsx::component::Component;
                 component.render(ui);
-            })
+            })) as Rc<dyn $crate::core::lib::rsx::component::Component>
         }
     };
 }
@@ -122,7 +200,8 @@ macro_rules! rsx_parse_children {
         $component:ident {} ; $($rest:tt)*
     ) => {
         {
-            let mut vec = vec![Box::new($crate::rsx!($component {})) as Box<dyn $crate::core::lib::rsx::component::Component>];
+            use std::rc::Rc;
+            let mut vec = vec![$crate::rsx!($component {})];
             vec.extend($crate::rsx_parse_children!($($rest)*));
             vec
         }
@@ -132,7 +211,18 @@ macro_rules! rsx_parse_children {
         $component:ident {}
     ) => {
         {
-            vec![Box::new($crate::rsx!($component {})) as Box<dyn $crate::core::lib::rsx::component::Component>]
+            vec![$crate::rsx!($component {})]
+        }
+    };
+
+    (
+        $component:ident {} $($rest:tt)+
+    ) => {
+        {
+            use std::rc::Rc;
+            let mut vec = vec![$crate::rsx!($component {})];
+            vec.extend($crate::rsx_parse_children!($($rest)*));
+            vec
         }
     };
 
@@ -140,8 +230,20 @@ macro_rules! rsx_parse_children {
         $component:ident { $($content:tt)* } ; $($rest:tt)*
     ) => {
         {
-            let mut vec = vec![Box::new($crate::rsx!($component { $($content)* })) as Box<dyn $crate::core::lib::rsx::component::Component>];
+            use std::rc::Rc;
+            let mut vec = vec![$crate::rsx!($component { $($content)* })];
             vec.extend($crate::rsx_parse_children!($($rest)*));
+            vec
+        }
+    };
+
+    (
+        $component:ident { $($content:tt)* } $next:tt $($rest:tt)*
+    ) => {
+        {
+            use std::rc::Rc;
+            let mut vec = vec![$crate::rsx!($component { $($content)* })];
+            vec.extend($crate::rsx_parse_children!($next $($rest)*));
             vec
         }
     };
@@ -150,15 +252,16 @@ macro_rules! rsx_parse_children {
         $component:ident { $($content:tt)* }
     ) => {
         {
-            vec![Box::new($crate::rsx!($component { $($content)* })) as Box<dyn $crate::core::lib::rsx::component::Component>]
+            vec![$crate::rsx!($component { $($content)* })]
         }
     };
 
     (
-        $text:literal ; $($rest:tt)*
+        $text:literal $(;)? $($rest:tt)*
     ) => {
         {
-            let mut vec = vec![Box::new($crate::rsx!($text)) as Box<dyn $crate::core::lib::rsx::component::Component>];
+            use std::rc::Rc;
+            let mut vec = vec![$crate::rsx!($text)];
             vec.extend($crate::rsx_parse_children!($($rest)*));
             vec
         }
@@ -168,15 +271,16 @@ macro_rules! rsx_parse_children {
         $text:literal
     ) => {
         {
-            vec![Box::new($crate::rsx!($text)) as Box<dyn $crate::core::lib::rsx::component::Component>]
+            vec![$crate::rsx!($text)]
         }
     };
 
     (
-        $component:ident ( $($args:expr),* $(,)? ) ; $($rest:tt)*
+        $component:ident ( $($args:expr),* $(,)? ) $(;)? $($rest:tt)*
     ) => {
         {
-            let mut vec = vec![Box::new($crate::rsx!($component ( $($args),* ))) as Box<dyn $crate::core::lib::rsx::component::Component>];
+            use std::rc::Rc;
+            let mut vec = vec![$crate::rsx!($component ( $($args),* ))];
             vec.extend($crate::rsx_parse_children!($($rest)*));
             vec
         }
@@ -186,7 +290,72 @@ macro_rules! rsx_parse_children {
         $component:ident ( $($args:expr),* $(,)? )
     ) => {
         {
-            vec![Box::new($crate::rsx!($component ( $($args),* ))) as Box<dyn $crate::core::lib::rsx::component::Component>]
+            vec![$crate::rsx!($component ( $($args),* ))]
+        }
+    };
+
+    (
+        if ($condition:expr) { $($content:tt)* } $(;)? $($rest:tt)*
+    ) => {
+        {
+            use std::rc::Rc;
+            let mut vec = vec![];
+            let conditional = $crate::rsx!(if ($condition) { $($content)* });
+            vec.push(conditional);
+            vec.extend($crate::rsx_parse_children!($($rest)*));
+            vec
+        }
+    };
+
+    (
+        if ($condition:expr) { $($content_if:tt)* } else { $($content_else:tt)* } $(;)? $($rest:tt)*
+    ) => {
+        {
+            use std::rc::Rc;
+            let mut vec = vec![];
+            let conditional = $crate::rsx!(if ($condition) { $($content_if)* } else { $($content_else)* });
+            vec.push(conditional);
+            vec.extend($crate::rsx_parse_children!($($rest)*));
+            vec
+        }
+    };
+
+    (
+        <> $($fragment_children:tt)* </> $(;)? $($rest:tt)*
+    ) => {
+        {
+            use std::rc::Rc;
+            let mut vec = vec![$crate::rsx!(<> $($fragment_children)* </>)];
+            vec.extend($crate::rsx_parse_children!($($rest)*));
+            vec
+        }
+    };
+
+    (
+        for $item:ident in ($array:expr) { $($content:tt)* } $(;)? $($rest:tt)*
+    ) => {
+        {
+            use std::rc::Rc;
+            let mut vec = vec![];
+            for $item in $array {
+                vec.push($crate::rsx!($($content)*));
+            }
+            vec.extend($crate::rsx_parse_children!($($rest)*));
+            vec
+        }
+    };
+
+    (
+        for ($idx:ident, $item:ident) in ($array:expr) { $($content:tt)* } $(;)? $($rest:tt)*
+    ) => {
+        {
+            use std::rc::Rc;
+            let mut vec = vec![];
+            for ($idx, $item) in $array.iter().enumerate() {
+                vec.push($crate::rsx!($($content)*));
+            }
+            vec.extend($crate::rsx_parse_children!($($rest)*));
+            vec
         }
     };
 }

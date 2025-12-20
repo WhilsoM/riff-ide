@@ -46,8 +46,10 @@ impl Default for CentralPanel {
     }
 }
 
-pub fn render_central_panel(ctx: &egui::Context, children: impl Component) {
-    egui::CentralPanel::default().show(ctx, |ui| {
-        children.render(ui);
-    });
+pub fn render_central_panel(ctx: &egui::Context, children: std::rc::Rc<dyn Component>) {
+    egui::CentralPanel::default()
+        .frame(egui::Frame::new().fill(ctx.style().visuals.window_fill))
+        .show(ctx, |ui| {
+            children.render(ui);
+        });
 }

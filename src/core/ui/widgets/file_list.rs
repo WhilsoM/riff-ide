@@ -3,16 +3,14 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::core::enums::enums::{FileType, Icon, UiAction};
-use crate::core::icons_store::IconStore;
 use crate::core::lib::rsx::component::Component;
 use crate::core::models::Entry;
-use crate::core::ui::ui_kit::{Text, View};
+use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::utils::utils::read_current_folder;
-use crate::rsx;
 
 pub fn FileList(
     data: Rc<RefCell<Vec<Entry>>>,
-    icons: Rc<IconStore>,
+    icons: Rc<IconsInteractionsStore>,
     on_item_click: Option<Rc<dyn Fn(&mut Entry) -> Option<UiAction>>>,
     pending_action: Rc<RefCell<Option<UiAction>>>,
 ) -> impl Component {
@@ -29,7 +27,7 @@ pub fn FileList(
 fn render_entry(
     ui: &mut egui::Ui,
     entry: &mut Entry,
-    icons: &IconStore,
+    icons: &IconsInteractionsStore,
     indent: usize,
     on_click: &Option<Rc<dyn Fn(&mut Entry) -> Option<UiAction>>>,
 ) -> Option<UiAction> {

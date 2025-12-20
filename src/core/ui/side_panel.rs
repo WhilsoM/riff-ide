@@ -5,12 +5,12 @@ use std::rc::Rc;
 use crate::core::lib::rsx::component::Component;
 use crate::core::ui::ui_kit::{Button, Separator, StyleSheet, Text, View};
 use crate::core::ui::widgets::{render_side_panel, FileList, SidePanel};
-use crate::core::{enums::enums::UiAction, icons_store::IconStore, models::Entry};
+use crate::core::{enums::enums::UiAction, models::Entry, stores::icons::IconsInteractionsStore};
 use crate::rsx;
 
 pub fn side_panel(
     files: &mut Vec<Entry>,
-    icons: Rc<IconStore>,
+    icons: Rc<IconsInteractionsStore>,
     ctx: &egui::Context,
 ) -> Option<UiAction> {
     let files_rc = Rc::new(RefCell::new(files.clone()));

@@ -2,15 +2,15 @@ use eframe::egui::{self};
 
 use crate::core::{
     enums::enums::{FileType, Icon, UiAction},
-    icons_store::IconStore,
     models::Entry,
+    stores::icons::IconsInteractionsStore,
     utils::utils::read_current_folder,
 };
 
 pub fn draw_entry(
     ui: &mut egui::Ui,
     entry: &mut Entry,
-    icons: &IconStore,
+    icons: &IconsInteractionsStore,
     indent: usize,
 ) -> Option<UiAction> {
     let mut action = None;

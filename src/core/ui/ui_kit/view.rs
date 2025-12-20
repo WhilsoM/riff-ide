@@ -44,75 +44,81 @@ impl ComponentWithProps for View {
 impl Component for View {
     fn render(&self, ui: &mut egui::Ui) {
         if let Some(style) = &self.props.style {
-            apply_style_to_view(ui, style);
+            if let Some(margin) = style.margin {
+                ui.add_space(margin.y);
+            }
         }
 
-        let align = match self.props.align.as_str() {
-            "start" => egui::Align::Min,
-            "end" => egui::Align::Max,
-            "center" => egui::Align::Center,
-            _ => egui::Align::Center,
-        };
+        let mut frame = egui::Frame::new();
 
-        if let Some(padding) = self.props.padding {
-            ui.add_space(padding);
+        if let Some(style) = &self.props.style {
+            if let Some(bg_color) = style.background_color {
+                frame = frame.fill(bg_color);
+            }
+
+            if let (Some(border_color), Some(border_width)) =
+                (style.border_color, style.border_width)
+            {
+                frame = frame.stroke(egui::Stroke::new(border_width, border_color));
+            }
+
+            if let Some(radius) = style.border_radius {
+                frame = frame.corner_radius(egui::CornerRadius::same(radius.min(255.0) as u8));
+            }
+
+            if let Some(padding) = style.padding {
+                let padding_val = padding.x.max(padding.y).min(127.0) as i8;
+                frame = frame.inner_margin(egui::Margin::same(padding_val));
+            } else if let Some(padding_val) = self.props.padding {
+                let padding_val = padding_val.min(127.0) as i8;
+                frame = frame.inner_margin(egui::Margin::same(padding_val));
+            }
+        } else if let Some(padding_val) = self.props.padding {
+            let padding_val = padding_val.min(127.0) as i8;
+            frame = frame.inner_margin(egui::Margin::same(padding_val));
         }
 
-        let direction = if let Some(style) = &self.props.style {
-            match style.flex_direction {
-                Some(crate::core::ui::ui_kit::style::FlexDirection::Row)
-                | Some(crate::core::ui::ui_kit::style::FlexDirection::RowReverse) => {
-                    egui::Direction::LeftToRight
+        frame.show(ui, |ui| {
+            let align = match self.props.align.as_str() {
+                "start" => egui::Align::Min,
+                "end" => egui::Align::Max,
+                "center" => egui::Align::Center,
+                _ => egui::Align::Center,
+            };
+
+            let direction = if let Some(style) = &self.props.style {
+                match style.flex_direction {
+                    Some(crate::core::ui::ui_kit::style::FlexDirection::Row)
+                    | Some(crate::core::ui::ui_kit::style::FlexDirection::RowReverse) => {
+                        egui::Direction::LeftToRight
+                    }
+                    _ => egui::Direction::TopDown,
                 }
-                _ => egui::Direction::TopDown,
-            }
-        } else {
-            egui::Direction::TopDown
-        };
+            } else {
+                egui::Direction::TopDown
+            };
 
-        let layout = match direction {
-            egui::Direction::LeftToRight => egui::Layout::left_to_right(align),
-            egui::Direction::RightToLeft => egui::Layout::right_to_left(align),
-            egui::Direction::TopDown => egui::Layout::top_down(align),
-            egui::Direction::BottomUp => egui::Layout::bottom_up(align),
-        };
+            let layout = match direction {
+                egui::Direction::LeftToRight => egui::Layout::left_to_right(align),
+                egui::Direction::RightToLeft => egui::Layout::right_to_left(align),
+                egui::Direction::TopDown => egui::Layout::top_down(align),
+                egui::Direction::BottomUp => egui::Layout::bottom_up(align),
+            };
 
-        ui.with_layout(layout, |ui| {
-            if let Some(spacing) = self.props.spacing {
-                ui.spacing_mut().item_spacing = egui::vec2(spacing, spacing);
-            }
-
-            if let Some(style) = &self.props.style {
-                if let Some(gap) = style.gap {
-                    ui.spacing_mut().item_spacing = egui::vec2(gap, gap);
+            ui.with_layout(layout, |ui| {
+                if let Some(spacing) = self.props.spacing {
+                    ui.spacing_mut().item_spacing = egui::vec2(spacing, spacing);
                 }
-            }
 
-            self.props.children.render(ui);
+                if let Some(style) = &self.props.style {
+                    if let Some(gap) = style.gap {
+                        ui.spacing_mut().item_spacing = egui::vec2(gap, gap);
+                    }
+                }
+
+                self.props.children.render(ui);
+            });
         });
-    }
-}
-
-fn apply_style_to_view(ui: &mut egui::Ui, style: &Style) {
-    if let Some(margin) = style.margin {
-        ui.add_space(margin.y);
-    }
-
-    if let Some(padding) = style.padding {
-        ui.add_space(padding.y);
-    }
-
-    if let Some(width) = style.width {
-        ui.set_width(width);
-    }
-    if let Some(height) = style.height {
-        ui.set_height(height);
-    }
-    if let Some(min_width) = style.min_width {
-        ui.set_min_width(min_width);
-    }
-    if let Some(min_height) = style.min_height {
-        ui.set_min_height(min_height);
     }
 }
 

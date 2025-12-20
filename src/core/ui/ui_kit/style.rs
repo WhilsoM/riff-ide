@@ -160,9 +160,17 @@ impl Style {
     }
 }
 
+// TODO: add .with() function to StyleSheet to add styles from one line
+// StyleSheet::new().with("container", gap(8.0).padding(8.0));
 pub struct StyleSheet {
     pub container: Rc<Style>,
     pub button_container: Rc<Style>,
+    pub explorer_panel: Option<Rc<Style>>,
+    pub editor_panel: Option<Rc<Style>>,
+    pub file_item: Option<Rc<Style>>,
+    pub file_item_hover: Option<Rc<Style>>,
+    pub text_primary: Option<Rc<Style>>,
+    pub text_secondary: Option<Rc<Style>>,
 }
 
 impl StyleSheet {
@@ -175,6 +183,12 @@ impl StyleSheet {
                     .gap(8.0)
                     .padding(8.0),
             ),
+            explorer_panel: None,
+            editor_panel: None,
+            file_item: None,
+            file_item_hover: None,
+            text_primary: None,
+            text_secondary: None,
         }
     }
 
