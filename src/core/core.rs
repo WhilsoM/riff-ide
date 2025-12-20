@@ -42,7 +42,7 @@ store! {
 pub struct MyApp {
     current_dir: PathBuf,
     files: Vec<Entry>,
-    icons: IconStore,
+    icons: Rc<IconStore>,
     opened_file: Option<PathBuf>,
     opened_text: String,
     actions_store: Rc<RefCell<ActionsStore>>,
@@ -63,7 +63,7 @@ impl MyApp {
         Self {
             current_dir,
             files,
-            icons,
+            icons: Rc::new(icons),
             opened_file,
             opened_text,
             actions_store,
@@ -81,10 +81,16 @@ impl MyApp {
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        if let Some(UiAction::OpenFile(path)) = side_panel(&mut self.files, &self.icons, ctx) {
+        if let Some(UiAction::OpenFile(path)) = side_panel(&mut self.files, self.icons.clone(), ctx)
+        {
             self.open_file(&path);
         }
 
-        code_editor(self.opened_file.as_ref(), &mut self.opened_text, ctx);
+        code_editor(
+            self.opened_file.as_ref(),
+            &mut self.opened_text,
+            &self.actions_store,
+            ctx,
+        );
     }
 }

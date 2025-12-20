@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum FileType {
     Folder,
     File,
@@ -15,6 +15,7 @@ pub enum Icon {
     Rust,
 }
 
+#[derive(Clone)]
 pub enum UiAction {
     OpenFile(PathBuf),
 }
