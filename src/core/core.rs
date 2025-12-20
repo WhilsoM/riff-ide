@@ -49,6 +49,11 @@ pub struct MyApp {
     file_actions: Rc<RefCell<FileActionsStore>>,
     file_interactions: Rc<RefCell<FileInteractionsStore>>,
     theme: Rc<ThemeInteractionsStore>,
+    is_dirty: bool,
+    // ra_process: Option<std::process::Child>,
+    // lsp: Option<Arc<AsyncMutex<LspClient>>>,
+    // diagnostics: Arc<Mutex<Vec<Diagnostic>>>,
+    // rt: Runtime,
 }
 
 impl MyApp {
@@ -79,6 +84,7 @@ impl MyApp {
             file_actions,
             file_interactions,
             theme,
+            is_dirty: false,
         }
     }
 }

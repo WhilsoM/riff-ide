@@ -91,12 +91,7 @@ pub struct Style {
     /// .border(Color::WHITE, 1.0)  // Sets both color and width
     /// ```
     pub border_color: Option<egui::Color32>,
-    /// Border width in pixels.
-    ///
-    /// Example:
-    /// ```rust,no_run
-    /// .border(egui::Color32::WHITE, 2.0)  // 2px border
-    /// ```
+    pub color: Option<egui::Color32>,
     pub border_width: Option<f32>,
     /// Border radius for rounded corners.
     ///
@@ -368,12 +363,11 @@ impl Style {
         self
     }
 
-    /// Set border radius for rounded corners.
-    ///
-    /// Example:
-    /// ```rust,no_run
-    /// .border_radius(5.0)  // 5px radius
-    /// ```
+    pub fn color(mut self, color: egui::Color32) -> Self {
+        self.color = Some(color);
+        self
+    }
+
     pub fn border_radius(mut self, radius: f32) -> Self {
         self.border_radius = Some(radius);
         self
