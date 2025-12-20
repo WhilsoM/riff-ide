@@ -3,10 +3,6 @@ use crate::core::ui::ui_kit::style::Style;
 use eframe::egui;
 use std::rc::Rc;
 
-pub struct View {
-    props: ViewProps,
-}
-
 /// Properties for the `View` component - a flexible container.
 ///
 /// Example usage in `rsx!`:
@@ -25,6 +21,10 @@ pub struct View {
 ///     }
 /// }
 /// ```
+pub struct View {
+    props: ViewProps,
+}
+
 #[derive(Clone, Default)]
 pub struct ViewProps {
     /// Alignment of children: "start", "center", or "end".

@@ -7,8 +7,7 @@ use crate::core::lib::rsx::component::ComponentWrapper;
 use crate::core::models::Entry;
 use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::ui::ui_kit::style::{FlexDirection, Style};
-use crate::core::ui::ui_kit::StyleSheet;
-use crate::core::ui::ui_kit::{Image, SelectableLabel, Spacer, View};
+use crate::core::ui::ui_kit::{Image, SelectableLabel, Spacer, StyleSheet, View};
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::file::stores::file_interactions::FileInteractionsStore;
 use crate::modules::file::stores::theme::ThemeInteractionsStore;
@@ -26,7 +25,7 @@ pub fn FileTreeItem(
     let theme_clone = theme.clone();
     let entry_clone = entry.clone();
 
-    let (icon_texture, name, is_open, ftype, path, children_refs) = {
+    let (icon_texture, name, ftype, path) = {
         let entry_borrowed = entry.borrow();
         let icon = match entry_borrowed.ftype {
             FileType::Folder if entry_borrowed.is_open => Icon::OpenFolder,
@@ -40,24 +39,19 @@ pub fn FileTreeItem(
             .unwrap()
             .to_string_lossy()
             .to_string();
-        let is_open = entry_borrowed.is_open;
         let ftype = entry_borrowed.ftype.clone();
         let path = entry_borrowed.path.clone();
-        let children_refs: Vec<Rc<RefCell<Entry>>> = entry_borrowed
-            .children
-            .iter()
-            .map(|child| Rc::new(RefCell::new(child.clone())))
-            .collect();
-        (icon_texture, name, is_open, ftype, path, children_refs)
+        (icon_texture, name, ftype, path)
     };
 
     let click_handler = {
         let entry = entry_clone.clone();
         let interactions = interactions_clone.clone();
         let path_clone = path.clone();
+        let ftype_clone = ftype.clone();
         Rc::new(move || {
             let mut entry = entry.borrow_mut();
-            match ftype {
+            match ftype_clone {
                 FileType::Folder => {
                     entry.is_open = !entry.is_open;
                     if entry.is_open && entry.children.is_empty() {
@@ -73,58 +67,47 @@ pub fn FileTreeItem(
         })
     };
 
-    let row_style = Style::default().flex_direction(FlexDirection::Row);
+    let styles = StyleSheet::new().with(
+        "container",
+        Style::new()
+            .padding_horizontal(10.0)
+            .flex_direction(FlexDirection::Row),
+    );
 
-    let children_components: Vec<Rc<dyn Component>> = if is_open {
-        children_refs
-            .into_iter()
-            .map(|child_ref| {
-                FileTreeItem(
-                    child_ref,
-                    icons_clone.clone(),
-                    interactions_clone.clone(),
-                    theme_clone.clone(),
-                    indent + 1,
-                )
-            })
-            .collect()
-    } else {
-        Vec::new()
+    let (children_components, child_refs): (Vec<Rc<dyn Component>>, Vec<Rc<RefCell<Entry>>>) = {
+        let entry_borrowed = entry.borrow();
+        if entry_borrowed.is_open && !entry_borrowed.children.is_empty() {
+            entry_borrowed
+                .children
+                .iter()
+                .map(|child| {
+                    let child_ref = Rc::new(RefCell::new(child.clone()));
+                    let component = FileTreeItem(
+                        child_ref.clone(),
+                        icons_clone.clone(),
+                        interactions_clone.clone(),
+                        theme_clone.clone(),
+                        indent + 1,
+                    );
+                    (component, child_ref)
+                })
+                .unzip()
+        } else {
+            (Vec::new(), Vec::new())
+        }
     };
 
-    fn render_children(children: Vec<Rc<dyn Component>>) -> Rc<dyn Component> {
-        Rc::new(ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
-            for child in &children {
-                child.render(ui);
-            }
-        })) as Rc<dyn Component>
-    }
+    Rc::new(ComponentWrapper::new({
+        let entry = entry_clone.clone();
+        let child_refs = child_refs.clone();
+        let children_components = children_components.clone();
 
-    let style = StyleSheet::new()
-        .with(
-            "container",
-            Style::new()
-                .padding_horizontal(8.0)
-                .background_color(theme_clone.bg_main_200),
-        )
-        .with(
-            "row",
-            Style::new()
-                .flex_direction(FlexDirection::Row)
-                .padding_horizontal(8.0)
-                .background_color(theme_clone.bg_main_200),
-        );
-
-    rsx! {
-        View {
-            align: "start".to_string(),
-            justify: "start".to_string(),
-            style: style.get("container"),
-            children: {
+        move |ui: &mut eframe::egui::Ui| {
+            rsx! {
                 View {
                     align: "start".to_string(),
                     justify: "start".to_string(),
-                    style: Some(Rc::new(row_style)),
+                    style: styles.get("container"),
                     children: {
                         Spacer {
                             size: (indent * 12) as f32,
@@ -134,15 +117,28 @@ pub fn FileTreeItem(
                         };
                         SelectableLabel {
                             selected: false,
-                            text: name,
+                            text: name.clone(),
                             text_color: Some(theme_clone.text_primary),
                             hover_color: Some(theme_clone.bg_hover),
-                            on_click: Some(click_handler),
+                            on_click: Some(click_handler.clone()),
                         }
                     }
-                };
-                render_children(children_components)
+                }
+            }
+            .render(ui);
+
+            for child in &children_components {
+                child.render(ui);
+            }
+
+            let mut entry = entry.borrow_mut();
+            if !child_refs.is_empty() && !entry.children.is_empty() {
+                for (i, child_ref) in child_refs.iter().enumerate() {
+                    if i < entry.children.len() {
+                        entry.children[i] = child_ref.borrow().clone();
+                    }
+                }
             }
         }
-    }
+    })) as Rc<dyn Component>
 }
