@@ -1,49 +1,49 @@
 use crate::core::lib::rsx::component::{Children, Component, ComponentWithProps};
 use eframe::egui;
-use std::rc::Rc;
+use std::{any::Any, rc::Rc};
 
-pub struct List<T> {
-    props: ListProps<T>,
+pub struct List {
+    props: ListProps,
 }
 
 /// Properties for the `List` component.
 ///
 /// When using in `rsx!` macro, you can hover over field names to see their documentation.
-pub struct ListProps<T> {
+pub struct ListProps {
     /// Array of data of any type to display in the list
-    pub data: Vec<T>,
+    pub data: Vec<Rc<dyn Any>>,
     /// Function for rendering each element.
     /// Takes an element and its index, returns a component to display.
     /// Usually used with the `rsx!` macro.
     ///
     /// Example:
     /// ```rust,no_run
-    /// let render_item = Rc::new(|item: &String, _index: usize| {
+    /// let render_item = Rc::new(|item: &dyn Any, _index: usize| {
     ///     rsx! {
     ///         Text {
-    ///             content: item.clone(),
+    ///             content: "Item".to_string(),
     ///         }
     ///     }
     /// });
     /// ```
-    pub render_item: Option<Rc<dyn Fn(&T, usize) -> Rc<dyn Component>>>,
+    pub render_item: Option<Rc<dyn Fn(&dyn Any, usize) -> Rc<dyn Component>>>,
     /// Optional function for generating a unique key for an element.
     /// Used for efficient list updates.
     ///
     /// Example:
     /// ```rust,no_run
-    /// key_fn: Some(Rc::new(|item: &String, index: usize| {
+    /// key_fn: Some(Rc::new(|item: &dyn Any, index: usize| {
     ///     format!("item-{}", index)
     /// }))
     /// ```
-    pub key_fn: Option<Rc<dyn Fn(&T, usize) -> String>>,
+    pub key_fn: Option<Rc<dyn Fn(&dyn Any, usize) -> String>>,
     /// Children components (used when `render_item` is not provided)
     pub children: Children,
     /// Optional styles for the list (padding, width, height)
     pub style: Option<Rc<crate::core::ui::ui_kit::style::Style>>,
 }
 
-impl<T> Default for ListProps<T> {
+impl Default for ListProps {
     fn default() -> Self {
         Self {
             data: vec![],
@@ -55,10 +55,10 @@ impl<T> Default for ListProps<T> {
     }
 }
 
-impl<T: Clone> Clone for ListProps<T> {
+impl Clone for ListProps {
     fn clone(&self) -> Self {
         Self {
-            data: self.data.clone(),
+            data: self.data.iter().map(|item| item.clone()).collect(),
             render_item: self.render_item.clone(),
             key_fn: self.key_fn.clone(),
             children: self.children.clone(),
@@ -67,31 +67,33 @@ impl<T: Clone> Clone for ListProps<T> {
     }
 }
 
-impl<T> List<T> {
+impl List {
     pub fn new() -> Self {
         Self {
             props: ListProps::default(),
         }
     }
 
-    pub fn new_with_props(props: ListProps<T>) -> Self {
+    pub fn new_with_props(props: ListProps) -> Self {
         Self { props }
     }
 }
 
-impl<T: Clone> ComponentWithProps for List<T> {
-    type Props = ListProps<T>;
+impl ComponentWithProps for List {
+    type Props = ListProps;
 
     fn new() -> Self {
-        Self::new()
+        List {
+            props: ListProps::default(),
+        }
     }
 
     fn new_with_props(props: Self::Props) -> Self {
-        Self::new_with_props(props)
+        List { props }
     }
 }
 
-impl<T> Component for List<T> {
+impl Component for List {
     fn render(&self, ui: &mut egui::Ui) {
         if let Some(style) = &self.props.style {
             apply_style_to_list(ui, style);
@@ -99,7 +101,7 @@ impl<T> Component for List<T> {
 
         if let Some(render_item) = &self.props.render_item {
             for (index, item) in self.props.data.iter().enumerate() {
-                let component = render_item(item, index);
+                let component = render_item(item.as_ref(), index);
                 component.render(ui);
             }
         } else {
@@ -125,7 +127,7 @@ fn apply_style_to_list(ui: &mut egui::Ui, style: &crate::core::ui::ui_kit::style
     }
 }
 
-impl<T> Default for List<T> {
+impl Default for List {
     fn default() -> Self {
         Self::new()
     }

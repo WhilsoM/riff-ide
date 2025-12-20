@@ -5,19 +5,17 @@ use std::rc::Rc;
 use crate::core::models::Entry;
 use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::ui::ui_kit::{Button, Separator, Text, View};
-use crate::core::ui::widgets::{render_side_panel, SidePanel};
-use crate::modules::file::components::FileList;
-use crate::modules::file::stores::file_actions::FileActionsStore;
-use crate::modules::file::stores::file_interactions::FileInteractionsStore;
-use crate::modules::file::stores::theme::ThemeInteractionsStore;
+use crate::core::ui::widgets::{SidePanel, render_side_panel};
+use crate::modules::editor::components::FileList;
+use crate::modules::editor::stores::context::get_theme;
+use crate::modules::editor::stores::{
+    EditorStores, FileActionsStore, FileInteractionsStore, theme_store,
+};
 use crate::rsx;
 
 pub struct FileExplorer {
     files: Rc<RefCell<Vec<Entry>>>,
-    icons: Rc<IconsInteractionsStore>,
-    interactions: Rc<RefCell<FileInteractionsStore>>,
-    actions: Rc<RefCell<FileActionsStore>>,
-    theme: Rc<ThemeInteractionsStore>,
+    stores: Rc<EditorStores>,
 }
 
 impl FileExplorer {
@@ -26,29 +24,25 @@ impl FileExplorer {
         icons: Rc<IconsInteractionsStore>,
         interactions: Rc<RefCell<FileInteractionsStore>>,
         actions: Rc<RefCell<FileActionsStore>>,
-        theme: Rc<ThemeInteractionsStore>,
     ) -> Self {
-        Self {
-            files,
-            icons,
-            interactions,
-            actions,
-            theme,
-        }
+        let stores = Rc::new(EditorStores::new(icons, interactions, actions, get_theme()));
+        Self { files, stores }
     }
 
     pub fn render(&self, ctx: &egui::Context) {
         let refresh_handler = {
-            let actions = Rc::clone(&self.actions);
+            let stores = self.stores.clone();
+            let ctx = ctx.clone();
             Rc::new(move || {
-                actions.borrow_mut().refresh_files();
+                stores.file_actions.borrow().refresh_files(&ctx);
             })
         };
 
         let new_file_handler = {
-            let actions = Rc::clone(&self.actions);
+            let stores = self.stores.clone();
+            let ctx = ctx.clone();
             Rc::new(move || {
-                actions.borrow_mut().create_new_file();
+                stores.file_actions.borrow().create_new_file(&ctx);
             })
         };
 
@@ -56,7 +50,7 @@ impl FileExplorer {
                 View {
                     align: "start".to_string(),
                     justify: "start".to_string(),
-                    style: Some(self.theme.bg_main_200_style()),
+                    style: Some(theme_store().bg_main_200_style(ctx)),
                     children: {
                         Text {
                             content: "Explorer".to_string(),
@@ -77,12 +71,7 @@ impl FileExplorer {
                             }
                         };
                         Separator {};
-                        FileList(
-                            self.files.clone(),
-                            self.icons.clone(),
-                            self.interactions.clone(),
-                            self.theme.clone()
-                        )
+                        FileList(ctx.clone())
                     }
                 }
         };

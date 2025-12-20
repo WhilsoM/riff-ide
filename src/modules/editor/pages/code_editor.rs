@@ -10,14 +10,13 @@ use crate::core::ui::ui_kit::{
     render_central_panel,
 };
 
-use crate::modules::file::stores::theme::ThemeInteractionsStore;
+use crate::modules::editor::stores::theme_store;
 use crate::rsx;
 
 pub struct CodeEditor {
     opened_file: Option<PathBuf>,
     opened_text: Rc<RefCell<String>>,
     actions_store: Rc<RefCell<ActionsStore>>,
-    theme: Rc<ThemeInteractionsStore>,
 }
 
 impl CodeEditor {
@@ -25,19 +24,17 @@ impl CodeEditor {
         opened_file: Option<PathBuf>,
         opened_text: Rc<RefCell<String>>,
         actions_store: Rc<RefCell<ActionsStore>>,
-        theme: Rc<ThemeInteractionsStore>,
     ) -> Self {
         Self {
             opened_file,
             opened_text,
             actions_store,
-            theme,
         }
     }
 
     pub fn render(&self, ctx: &egui::Context) {
         if let Some(path) = &self.opened_file {
-            let increment_handler = {
+            let _increment_handler = {
                 let store = Rc::clone(&self.actions_store);
                 let ctx = ctx.clone();
                 Rc::new(move || {
@@ -47,14 +44,15 @@ impl CodeEditor {
 
             let file_name = path.file_name().unwrap().to_string_lossy();
             let text_value = self.opened_text.clone();
-            let theme_style_100 = self.theme.bg_main_100_style();
-            let theme_style_text = self.theme.text_primary_style();
+            let theme = theme_store();
+            let theme_style_100 = theme.bg_main_100_style(ctx);
+            let theme_style_text = theme.text_primary_style(ctx);
 
             let style = StyleSheet::new().with(
                 "file_container",
                 Style::new()
                     .padding(10.0)
-                    .background_color(self.theme.bg_main_200),
+                    .background_color(theme.bg_main_200.get(ctx)),
             );
 
             let editor_view = rsx! {
@@ -99,7 +97,8 @@ impl CodeEditor {
                 println!("Select a file from the explorer");
             });
 
-            let theme_style_100 = self.theme.bg_main_100_style();
+            let theme = theme_store();
+            let theme_style_100 = theme.bg_main_100_style(ctx);
             let empty_view = rsx! {
                 CentralPanel {
                     children: {

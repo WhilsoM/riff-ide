@@ -3,5 +3,4 @@ pub mod pages;
 pub mod shared;
 pub mod stores;
 
-pub use pages::{FileExplorer, CodeEditor};
-
+pub use pages::{CodeEditor, FileExplorer, Navbar};

@@ -93,6 +93,14 @@ pub struct Style {
     pub border_color: Option<egui::Color32>,
     pub color: Option<egui::Color32>,
     pub border_width: Option<f32>,
+    pub border_top_color: Option<egui::Color32>,
+    pub border_top_width: Option<f32>,
+    pub border_bottom_color: Option<egui::Color32>,
+    pub border_bottom_width: Option<f32>,
+    pub border_left_color: Option<egui::Color32>,
+    pub border_left_width: Option<f32>,
+    pub border_right_color: Option<egui::Color32>,
+    pub border_right_width: Option<f32>,
     /// Border radius for rounded corners.
     ///
     /// Example:
@@ -354,12 +362,40 @@ impl Style {
     /// ```rust,no_run
     /// use crate::core::ui::ui_kit::color::Color;
     ///
-    /// .border(Color::WHITE, 1.0)  // White border, 1px width
-    /// .border(Color::rgb(255, 0, 0), 2.0)  // Red border, 2px width
+    /// .border_color(Color::WHITE)  // White border
+    /// .border_color(Color::rgb(255, 0, 0))  // Red border
     /// ```
-    pub fn border(mut self, color: impl Into<egui::Color32>, width: f32) -> Self {
+    pub fn border_color(mut self, color: impl Into<egui::Color32>) -> Self {
         self.border_color = Some(color.into());
+        self
+    }
+
+    pub fn border_width(mut self, width: f32) -> Self {
         self.border_width = Some(width);
+        self
+    }
+
+    pub fn border_top(mut self, color: impl Into<egui::Color32>, width: f32) -> Self {
+        self.border_top_color = Some(color.into());
+        self.border_top_width = Some(width);
+        self
+    }
+
+    pub fn border_bottom(mut self, color: impl Into<egui::Color32>, width: f32) -> Self {
+        self.border_bottom_color = Some(color.into());
+        self.border_bottom_width = Some(width);
+        self
+    }
+
+    pub fn border_left(mut self, color: impl Into<egui::Color32>, width: f32) -> Self {
+        self.border_left_color = Some(color.into());
+        self.border_left_width = Some(width);
+        self
+    }
+
+    pub fn border_right(mut self, color: impl Into<egui::Color32>, width: f32) -> Self {
+        self.border_right_color = Some(color.into());
+        self.border_right_width = Some(width);
         self
     }
 
@@ -460,6 +496,17 @@ impl Style {
     /// ```
     pub fn height(mut self, height: f32) -> Self {
         self.height = Some(height);
+        self
+    }
+
+    /// Set minimum width.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// .max_width(100.0)  // 100px maximum width
+    /// ```
+    pub fn max_width(mut self, width: f32) -> Self {
+        self.max_width = Some(width);
         self
     }
 

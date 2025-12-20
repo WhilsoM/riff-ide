@@ -1,3 +1,3 @@
-pub mod file;
+pub mod editor;
 
-pub use file::{CodeEditor, FileExplorer};
+pub use editor::{CodeEditor, FileExplorer};

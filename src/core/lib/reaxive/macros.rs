@@ -20,6 +20,12 @@ macro_rules! store {
             _changed: std::cell::Cell<bool>,
         }
 
+        thread_local! {
+            static INSTANCE: std::cell::RefCell<$name> = std::cell::RefCell::new($name {
+                $($fname: crate::core::lib::reaxive::reactive::ReField::new($default)),*
+            });
+        }
+
         impl $name {
             pub fn new() -> Self {
                 Self {
@@ -33,6 +39,18 @@ macro_rules! store {
                     ctx,
                     _changed: std::cell::Cell::new(false),
                 }
+            }
+
+            pub fn instance() -> std::cell::Ref<'static, $name> {
+                INSTANCE.with(|s| {
+                    unsafe { std::mem::transmute(s.borrow()) }
+                })
+            }
+
+            pub fn instance_mut() -> std::cell::RefMut<'static, $name> {
+                INSTANCE.with(|s| {
+                    unsafe { std::mem::transmute(s.borrow_mut()) }
+                })
             }
 
             $(
@@ -62,5 +80,6 @@ macro_rules! store {
                 }
             }
         }
+
     };
 }

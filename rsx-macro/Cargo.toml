@@ -1,11 +1,13 @@
 [package]
-name = "riff"
+name = "riff-rsx-macro"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+
+[lib]
+proc-macro = true
 
 [dependencies]
-eframe = "0.33.3"
-image = "0.25.9"
 syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
-riff-rsx-macro = { path = "rsx-macro" }
+proc-macro2 = "1.0"
+

@@ -2,29 +2,27 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::core::enums::enums::{FileType, Icon};
-use crate::core::lib::rsx::component::Component;
-use crate::core::lib::rsx::component::ComponentWrapper;
+use crate::core::lib::rsx::component::Children;
+use crate::core::lib::rsx::component::Element;
 use crate::core::models::Entry;
-use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::ui::ui_kit::StyleSheet;
 use crate::core::ui::ui_kit::style::{FlexDirection, Style};
 use crate::core::ui::ui_kit::{Image, SelectableLabel, Spacer, View};
 use crate::core::utils::utils::read_current_folder;
-use crate::modules::file::stores::file_interactions::FileInteractionsStore;
-use crate::modules::file::stores::theme::ThemeInteractionsStore;
+use crate::modules::editor::stores::context::{get_file_interactions, get_icons};
+use crate::modules::editor::stores::theme_store;
 use crate::rsx;
+use riff_rsx_macro::component;
 
-#[allow(non_snake_case)]
+#[component]
 pub fn FileTreeItem(
     entry: Rc<RefCell<Entry>>,
-    icons: Rc<IconsInteractionsStore>,
-    interactions: Rc<RefCell<FileInteractionsStore>>,
-    theme: Rc<ThemeInteractionsStore>,
     indent: usize,
-) -> Rc<dyn Component> {
-    let icons_clone = icons.clone();
-    let interactions_clone = interactions.clone();
-    let theme_clone = theme.clone();
+    ctx: eframe::egui::Context,
+) -> Element {
+    let icons = get_icons();
+    let theme = theme_store();
+    let interactions = get_file_interactions();
     let entry_clone = entry.clone();
 
     let (icon_texture, name, ftype, path) = {
@@ -34,7 +32,7 @@ pub fn FileTreeItem(
             FileType::Folder => Icon::Folder,
             _ => Icon::File,
         };
-        let icon_texture = icons_clone.get(&icon).id();
+        let icon_texture = icons.get(&icon).id();
         let name = entry_borrowed
             .path
             .file_name()
@@ -48,7 +46,6 @@ pub fn FileTreeItem(
 
     let click_handler = {
         let entry = entry_clone.clone();
-        let interactions = interactions_clone.clone();
         let path_clone = path.clone();
         let ftype_clone = ftype.clone();
         Rc::new(move || {
@@ -61,8 +58,7 @@ pub fn FileTreeItem(
                     }
                 }
                 FileType::File => {
-                    let mut interactions = interactions.borrow_mut();
-                    interactions.handle_file_click(&path_clone);
+                    interactions.borrow_mut().handle_file_click(&path_clone);
                 }
                 _ => {}
             }
@@ -76,7 +72,7 @@ pub fn FileTreeItem(
             .flex_direction(FlexDirection::Row),
     );
 
-    let (children_components, child_refs): (Vec<Rc<dyn Component>>, Vec<Rc<RefCell<Entry>>>) = {
+    let children_components: Vec<Element> = {
         let entry_borrowed = entry.borrow();
         if entry_borrowed.is_open && !entry_borrowed.children.is_empty() {
             entry_borrowed
@@ -84,63 +80,44 @@ pub fn FileTreeItem(
                 .iter()
                 .map(|child| {
                     let child_ref = Rc::new(RefCell::new(child.clone()));
-                    let component = FileTreeItem(
-                        child_ref.clone(),
-                        icons_clone.clone(),
-                        interactions_clone.clone(),
-                        theme_clone.clone(),
-                        indent + 1,
-                    );
-                    (component, child_ref)
+                    FileTreeItem(child_ref, indent + 1, ctx.clone())
                 })
-                .unzip()
+                .collect()
         } else {
-            (Vec::new(), Vec::new())
+            Vec::new()
         }
     };
 
-    Rc::new(ComponentWrapper::new({
-        let entry = entry_clone.clone();
-        let child_refs = child_refs.clone();
-        let children_components = children_components.clone();
-
-        move |ui: &mut eframe::egui::Ui| {
-            rsx! {
-                View {
-                    align: "start".to_string(),
-                    justify: "start".to_string(),
-                    style: styles.get("container"),
-                    children: {
+    rsx! {
+        View {
+            align: "start".to_string(),
+            justify: "start".to_string(),
+            style: styles.get("container"),
+            children: Children::Multiple({
+                let mut ch = vec![
+                    rsx! {
                         Spacer {
                             size: (indent * 12) as f32,
-                        };
+                        }
+                    },
+                    rsx! {
                         Image {
                             texture_id: Some(icon_texture),
-                        };
+                        }
+                    },
+                    rsx! {
                         SelectableLabel {
                             selected: false,
                             text: name.clone(),
-                            text_color: Some(theme_clone.text_primary),
-                            hover_color: Some(theme_clone.bg_hover),
+                            text_color: Some(theme.text_primary.get(&ctx)),
+                            hover_color: Some(theme.bg_hover.get(&ctx)),
                             on_click: Some(click_handler.clone()),
                         }
-                    }
-                }
-            }
-            .render(ui);
-
-            for child in &children_components {
-                child.render(ui);
-            }
-
-            let mut entry = entry.borrow_mut();
-            if !child_refs.is_empty() && !entry.children.is_empty() {
-                for (i, child_ref) in child_refs.iter().enumerate() {
-                    if i < entry.children.len() {
-                        entry.children[i] = child_ref.borrow().clone();
-                    }
-                }
-            }
+                    },
+                ];
+                ch.extend(children_components);
+                ch
+            }),
         }
-    })) as Rc<dyn Component>
+    }
 }

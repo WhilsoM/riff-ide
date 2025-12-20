@@ -29,11 +29,30 @@ impl FileInteractionsStore {
         self.pending_action.borrow_mut().take()
     }
 
-    pub fn handle_save_file(&mut self) -> Option<UiAction> {}
+    pub fn handle_save_file(&mut self) -> Option<UiAction> {
+        None
+    }
 }
 
 impl Default for FileInteractionsStore {
     fn default() -> Self {
         Self::new()
     }
+}
+
+thread_local! {
+    static STORE: RefCell<Option<Rc<RefCell<FileInteractionsStore>>>> = RefCell::new(None);
+}
+
+pub fn init_store(store: Rc<RefCell<FileInteractionsStore>>) {
+    STORE.with(|s| *s.borrow_mut() = Some(store));
+}
+
+pub fn get_store() -> Rc<RefCell<FileInteractionsStore>> {
+    STORE.with(|s| {
+        s.borrow()
+            .as_ref()
+            .expect("FileInteractionsStore not initialized")
+            .clone()
+    })
 }

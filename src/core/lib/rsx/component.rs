@@ -5,6 +5,8 @@ pub trait Component {
     fn render(&self, ui: &mut egui::Ui);
 }
 
+pub type Element = Rc<dyn Component>;
+
 pub struct RenderContext<'a> {
     pub ui: &'a mut egui::Ui,
 }
@@ -19,8 +21,8 @@ impl<'a> RenderContext<'a> {
 pub enum Children {
     #[default]
     None,
-    Single(Rc<dyn Component>),
-    Multiple(Vec<Rc<dyn Component>>),
+    Single(Element),
+    Multiple(Vec<Element>),
 }
 
 impl Clone for Children {
@@ -47,14 +49,14 @@ impl Children {
     }
 }
 
-impl From<Rc<dyn Component>> for Children {
-    fn from(component: Rc<dyn Component>) -> Self {
+impl From<Element> for Children {
+    fn from(component: Element) -> Self {
         Children::Single(component)
     }
 }
 
-impl From<Vec<Rc<dyn Component>>> for Children {
-    fn from(components: Vec<Rc<dyn Component>>) -> Self {
+impl From<Vec<Element>> for Children {
+    fn from(components: Vec<Element>) -> Self {
         Children::Multiple(components)
     }
 }

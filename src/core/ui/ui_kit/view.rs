@@ -106,7 +106,9 @@ impl ComponentWithProps for View {
 
 impl Component for View {
     fn render(&self, ui: &mut egui::Ui) {
-        if let Some(style) = &self.props.style {
+        let style = &self.props.style;
+
+        if let Some(style) = style {
             if let Some(margin) = style.margin {
                 ui.add_space(margin.y);
             }
@@ -114,7 +116,7 @@ impl Component for View {
 
         let mut frame = egui::Frame::new();
 
-        if let Some(style) = &self.props.style {
+        if let Some(style) = style {
             if let Some(bg_color) = style.background_color {
                 frame = frame.fill(bg_color);
             }
@@ -157,7 +159,7 @@ impl Component for View {
             frame = frame.inner_margin(egui::Margin::same(padding_val));
         }
 
-        frame.show(ui, |ui| {
+        let render_content = |ui: &mut egui::Ui| {
             let align = match self.props.align.as_str() {
                 "start" => egui::Align::Min,
                 "end" => egui::Align::Max,
@@ -197,7 +199,57 @@ impl Component for View {
 
                 self.props.children.render(ui);
             });
-        });
+        };
+
+        let height_constraint = style.as_ref().and_then(|s| s.height);
+        let width_constraint = style.as_ref().and_then(|s| s.width);
+
+        if width_constraint.is_some() {
+            frame.show(ui, |ui| {
+                if let Some(height) = height_constraint {
+                    ui.set_height(height);
+                }
+                if let Some(width) = width_constraint {
+                    ui.set_width(width);
+                }
+                render_content(ui);
+            });
+        } else {
+            let direction = if let Some(style) = &self.props.style {
+                match style.flex_direction {
+                    Some(crate::core::ui::ui_kit::style::FlexDirection::Row)
+                    | Some(crate::core::ui::ui_kit::style::FlexDirection::RowReverse) => {
+                        egui::Direction::LeftToRight
+                    }
+                    _ => egui::Direction::TopDown,
+                }
+            } else {
+                egui::Direction::TopDown
+            };
+
+            match direction {
+                egui::Direction::LeftToRight => {
+                    ui.horizontal(|ui| {
+                        frame.show(ui, |ui| {
+                            if let Some(height) = height_constraint {
+                                ui.set_height(height);
+                            }
+                            render_content(ui);
+                        });
+                    });
+                }
+                _ => {
+                    ui.vertical(|ui| {
+                        frame.show(ui, |ui| {
+                            if let Some(height) = height_constraint {
+                                ui.set_height(height);
+                            }
+                            render_content(ui);
+                        });
+                    });
+                }
+            }
+        }
     }
 }
 

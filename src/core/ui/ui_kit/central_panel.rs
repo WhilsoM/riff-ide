@@ -1,5 +1,6 @@
-use crate::core::lib::rsx::component::{Children, Component, ComponentWithProps};
+use crate::core::lib::rsx::component::{Children, Component, ComponentWithProps, ComponentWrapper};
 use eframe::egui;
+use std::rc::Rc;
 
 pub struct CentralPanel {
     props: CentralPanelProps,
@@ -50,6 +51,31 @@ impl CentralPanel {
     }
 
     pub fn new_with_props(props: CentralPanelProps) -> Self {
+        let children = match &props.children {
+            Children::None => return Self { props },
+            Children::Single(child) => child.clone(),
+            Children::Multiple(children) => {
+                if children.is_empty() {
+                    return Self { props };
+                }
+                if children.len() == 1 {
+                    children[0].clone()
+                } else {
+                    use crate::core::lib::rsx::component::ComponentWrapper;
+                    let children_clone = children.clone();
+                    Rc::new(ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
+                        for child in &children_clone {
+                            child.render(ui);
+                        }
+                    })) as Rc<dyn Component>
+                }
+            }
+        };
+
+        crate::core::ui::ui_kit::app::register_panel(
+            crate::core::ui::ui_kit::app::PanelData::Central { children },
+        );
+
         Self { props }
     }
 }

@@ -11,12 +11,7 @@ macro_rules! rsx {
 
     ($component:ident ( $($args:expr),* $(,)? )) => {
         {
-            use std::rc::Rc;
-            let component = $component($($args),*);
-            Rc::new($crate::core::lib::rsx::component::ComponentWrapper::new(move |ui: &mut eframe::egui::Ui| {
-                use $crate::core::lib::rsx::component::Component;
-                component.render(ui);
-            })) as Rc<dyn $crate::core::lib::rsx::component::Component>
+            $component($($args),*)
         }
     };
 
@@ -196,11 +191,30 @@ macro_rules! rsx_parse_children {
         vec![]
     };
 
+    // Function call with args and semicolon - must come before other rules
+    (
+        $component:ident ( $($args:expr),* $(,)? ) ; $($rest:tt)*
+    ) => {
+        {
+            let mut vec = vec![$crate::rsx!($component ( $($args),* ))];
+            vec.extend($crate::rsx_parse_children!($($rest)*));
+            vec
+        }
+    };
+
+    // Function call with args (final, no semicolon)
+    (
+        $component:ident ( $($args:expr),* $(,)? )
+    ) => {
+        {
+            vec![$crate::rsx!($component ( $($args),* ))]
+        }
+    };
+
     (
         $component:ident {} ; $($rest:tt)*
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![$crate::rsx!($component {})];
             vec.extend($crate::rsx_parse_children!($($rest)*));
             vec
@@ -219,7 +233,6 @@ macro_rules! rsx_parse_children {
         $component:ident {} $($rest:tt)+
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![$crate::rsx!($component {})];
             vec.extend($crate::rsx_parse_children!($($rest)*));
             vec
@@ -230,7 +243,6 @@ macro_rules! rsx_parse_children {
         $component:ident { $($content:tt)* } ; $($rest:tt)*
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![$crate::rsx!($component { $($content)* })];
             vec.extend($crate::rsx_parse_children!($($rest)*));
             vec
@@ -241,7 +253,6 @@ macro_rules! rsx_parse_children {
         $component:ident { $($content:tt)* } $next:tt $($rest:tt)*
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![$crate::rsx!($component { $($content)* })];
             vec.extend($crate::rsx_parse_children!($next $($rest)*));
             vec
@@ -260,7 +271,6 @@ macro_rules! rsx_parse_children {
         $text:literal $(;)? $($rest:tt)*
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![$crate::rsx!($text)];
             vec.extend($crate::rsx_parse_children!($($rest)*));
             vec
@@ -276,29 +286,9 @@ macro_rules! rsx_parse_children {
     };
 
     (
-        $component:ident ( $($args:expr),* $(,)? ) $(;)? $($rest:tt)*
-    ) => {
-        {
-            use std::rc::Rc;
-            let mut vec = vec![$crate::rsx!($component ( $($args),* ))];
-            vec.extend($crate::rsx_parse_children!($($rest)*));
-            vec
-        }
-    };
-
-    (
-        $component:ident ( $($args:expr),* $(,)? )
-    ) => {
-        {
-            vec![$crate::rsx!($component ( $($args),* ))]
-        }
-    };
-
-    (
         if ($condition:expr) { $($content:tt)* } $(;)? $($rest:tt)*
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![];
             let conditional = $crate::rsx!(if ($condition) { $($content)* });
             vec.push(conditional);
@@ -311,7 +301,6 @@ macro_rules! rsx_parse_children {
         if ($condition:expr) { $($content_if:tt)* } else { $($content_else:tt)* } $(;)? $($rest:tt)*
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![];
             let conditional = $crate::rsx!(if ($condition) { $($content_if)* } else { $($content_else)* });
             vec.push(conditional);
@@ -324,7 +313,6 @@ macro_rules! rsx_parse_children {
         <> $($fragment_children:tt)* </> $(;)? $($rest:tt)*
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![$crate::rsx!(<> $($fragment_children)* </>)];
             vec.extend($crate::rsx_parse_children!($($rest)*));
             vec
@@ -335,7 +323,6 @@ macro_rules! rsx_parse_children {
         for $item:ident in ($array:expr) { $($content:tt)* } $(;)? $($rest:tt)*
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![];
             for $item in $array {
                 vec.push($crate::rsx!($($content)*));
@@ -349,7 +336,6 @@ macro_rules! rsx_parse_children {
         for ($idx:ident, $item:ident) in ($array:expr) { $($content:tt)* } $(;)? $($rest:tt)*
     ) => {
         {
-            use std::rc::Rc;
             let mut vec = vec![];
             for ($idx, $item) in $array.iter().enumerate() {
                 vec.push($crate::rsx!($($content)*));
