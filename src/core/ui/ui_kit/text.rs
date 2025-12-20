@@ -1,4 +1,9 @@
-use crate::core::lib::rsx::component::{Children, Component, ComponentWithProps};
+use std::rc::Rc;
+
+use crate::core::{
+    lib::rsx::component::{Children, Component, ComponentWithProps},
+    ui::ui_kit::Style,
+};
 use eframe::egui;
 
 pub struct Text {
@@ -26,6 +31,7 @@ pub struct TextProps {
     pub content: String,
     /// Child components (rarely used for Text).
     pub children: Children,
+    pub style: Option<Rc<Style>>,
 }
 
 impl Text {

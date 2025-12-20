@@ -8,6 +8,7 @@ use crate::core::models::Entry;
 use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::utils::utils::read_current_folder;
 
+#[allow(non_snake_case)]
 pub fn FileList(
     data: Rc<RefCell<Vec<Entry>>>,
     icons: Rc<IconsInteractionsStore>,

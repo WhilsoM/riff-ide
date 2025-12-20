@@ -38,7 +38,7 @@ impl ThemeInteractionsStore {
             bg_active: egui::Color32::from_rgb(55, 55, 55),
             bg_selected: egui::Color32::from_rgb(0, 122, 204),
 
-            text_primary: egui::Color32::from_rgb(212, 212, 212),
+            text_primary: egui::Color32::from_rgb(112, 212, 212),
             text_secondary: egui::Color32::from_rgb(170, 170, 170),
             text_tertiary: egui::Color32::from_rgb(130, 130, 130),
             text_disabled: egui::Color32::from_rgb(100, 100, 100),
@@ -57,6 +57,8 @@ impl ThemeInteractionsStore {
         }
     }
 
+    // BACKGROUND
+
     pub fn bg_main_100_style(&self) -> Rc<Style> {
         Rc::new(Style::new().background_color(self.bg_main_100))
     }
@@ -71,6 +73,11 @@ impl ThemeInteractionsStore {
 
     pub fn bg_hover_style(&self) -> Rc<Style> {
         Rc::new(Style::new().background_color(self.bg_hover))
+    }
+
+    // COLOR
+    pub fn text_primary_style(&self) -> Rc<Style> {
+        Rc::new(Style::new().color(self.bg_hover))
     }
 }
 

@@ -5,6 +5,7 @@ use std::rc::Rc;
 pub struct FileActionsStore {
     pub opened_file: Rc<RefCell<Option<PathBuf>>>,
     pub opened_text: Rc<RefCell<String>>,
+    pub is_dirty: Rc<RefCell<bool>>,
 }
 
 impl FileActionsStore {
@@ -12,6 +13,7 @@ impl FileActionsStore {
         Self {
             opened_file: Rc::new(RefCell::new(None)),
             opened_text: Rc::new(RefCell::new(String::new())),
+            is_dirty: Rc::new(RefCell::new(false)),
         }
     }
 
@@ -19,6 +21,7 @@ impl FileActionsStore {
         if let Ok(text) = std::fs::read_to_string(path) {
             *self.opened_file.borrow_mut() = Some(path.clone());
             *self.opened_text.borrow_mut() = text;
+            *self.is_dirty.borrow_mut() = false;
         }
     }
 
@@ -27,6 +30,8 @@ impl FileActionsStore {
             let text = self.opened_text.borrow().clone();
             if let Err(e) = std::fs::write(path, text) {
                 eprintln!("Failed to save file: {}", e);
+            } else {
+                *self.is_dirty.borrow_mut() = false;
             }
         }
     }

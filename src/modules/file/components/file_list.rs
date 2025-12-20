@@ -23,6 +23,7 @@ fn sync_entry_recursive(original: &mut Entry, updated: &Entry) {
     }
 }
 
+#[allow(non_snake_case)]
 pub fn FileList(
     data: Rc<RefCell<Vec<Entry>>>,
     icons: Rc<IconsInteractionsStore>,

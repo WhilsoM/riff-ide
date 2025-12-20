@@ -6,13 +6,15 @@ use crate::core::lib::rsx::component::Component;
 use crate::core::lib::rsx::component::ComponentWrapper;
 use crate::core::models::Entry;
 use crate::core::stores::icons::IconsInteractionsStore;
+use crate::core::ui::ui_kit::StyleSheet;
 use crate::core::ui::ui_kit::style::{FlexDirection, Style};
-use crate::core::ui::ui_kit::{Image, SelectableLabel, Spacer, StyleSheet, View};
+use crate::core::ui::ui_kit::{Image, SelectableLabel, Spacer, View};
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::file::stores::file_interactions::FileInteractionsStore;
 use crate::modules::file::stores::theme::ThemeInteractionsStore;
 use crate::rsx;
 
+#[allow(non_snake_case)]
 pub fn FileTreeItem(
     entry: Rc<RefCell<Entry>>,
     icons: Rc<IconsInteractionsStore>,
