@@ -6,7 +6,8 @@ use eframe::egui;
 
 use crate::core::core::ActionsStore;
 use crate::core::ui::ui_kit::{
-    Button, CentralPanel, ScrollArea, Separator, Text, TextEdit, View, render_central_panel,
+    Button, CentralPanel, ScrollArea, Separator, Style, StyleSheet, Text, TextEdit, View,
+    render_central_panel,
 };
 
 use crate::modules::file::stores::theme::ThemeInteractionsStore;
@@ -47,8 +48,14 @@ impl CodeEditor {
             let file_name = path.file_name().unwrap().to_string_lossy();
             let text_value = self.opened_text.clone();
             let theme_style_100 = self.theme.bg_main_100_style();
-            let theme_style_200 = self.theme.bg_main_200_style();
             let theme_style_text = self.theme.text_primary_style();
+
+            let style = StyleSheet::new().with(
+                "file_container",
+                Style::new()
+                    .padding(10.0)
+                    .background_color(self.theme.bg_main_200),
+            );
 
             let editor_view = rsx! {
                 CentralPanel {
@@ -61,7 +68,7 @@ impl CodeEditor {
                                 View {
                                     align: "start".to_string(),
                                     justify: "space-between".to_string(),
-                                    style: Some(theme_style_200),
+                                    style: style.get("file_container"),
                                     children: {
                                         Text {
                                             content: file_name.to_string(),

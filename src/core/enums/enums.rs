@@ -18,4 +18,5 @@ pub enum Icon {
 #[derive(Clone)]
 pub enum UiAction {
     OpenFile(PathBuf),
+    SaveFile(PathBuf),
 }

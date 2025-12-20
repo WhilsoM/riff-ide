@@ -9,6 +9,7 @@ use crate::modules::file::components::file_tree_item::FileTreeItem;
 use crate::modules::file::stores::file_interactions::FileInteractionsStore;
 use crate::modules::file::stores::theme::ThemeInteractionsStore;
 
+#[allow(non_snake_case)]
 pub fn FileList(
     data: Rc<RefCell<Vec<Entry>>>,
     icons: Rc<IconsInteractionsStore>,

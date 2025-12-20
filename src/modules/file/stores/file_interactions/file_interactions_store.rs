@@ -1,7 +1,7 @@
-use std::path::PathBuf;
-use std::cell::RefCell;
-use std::rc::Rc;
 use crate::core::enums::enums::UiAction;
+use std::cell::RefCell;
+use std::path::PathBuf;
+use std::rc::Rc;
 
 pub struct FileInteractionsStore {
     pub pending_action: Rc<RefCell<Option<UiAction>>>,
@@ -28,6 +28,8 @@ impl FileInteractionsStore {
     pub fn take_action(&mut self) -> Option<UiAction> {
         self.pending_action.borrow_mut().take()
     }
+
+    pub fn handle_save_file(&mut self) -> Option<UiAction> {}
 }
 
 impl Default for FileInteractionsStore {
@@ -35,4 +37,3 @@ impl Default for FileInteractionsStore {
         Self::new()
     }
 }
-
