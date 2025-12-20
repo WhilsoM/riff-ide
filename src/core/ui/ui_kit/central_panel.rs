@@ -5,8 +5,40 @@ pub struct CentralPanel {
     props: CentralPanelProps,
 }
 
+/// Properties for the `CentralPanel` component - the main content area.
+///
+/// Example usage in `rsx!`:
+/// ```rust,no_run
+/// rsx! {
+///     CentralPanel {
+///         children: {
+///             View {
+///                 align: "center".to_string(),
+///                 justify: "center".to_string(),
+///                 children: {
+///                     Text { content: "Main content".to_string() }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[derive(Clone, Default)]
 pub struct CentralPanelProps {
+    /// Child components to render in the central panel.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// children: {
+    ///     View {
+    ///         align: "center".to_string(),
+    ///         justify: "center".to_string(),
+    ///         children: {
+    ///             Text { content: "Content".to_string() }
+    ///         }
+    ///     }
+    /// }
+    /// ```
     pub children: Children,
 }
 

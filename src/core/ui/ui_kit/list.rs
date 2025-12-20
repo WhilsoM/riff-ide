@@ -6,11 +6,40 @@ pub struct List<T> {
     props: ListProps<T>,
 }
 
+/// Properties for the `List` component.
+///
+/// When using in `rsx!` macro, you can hover over field names to see their documentation.
 pub struct ListProps<T> {
+    /// Array of data of any type to display in the list
     pub data: Vec<T>,
+    /// Function for rendering each element.
+    /// Takes an element and its index, returns a component to display.
+    /// Usually used with the `rsx!` macro.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// let render_item = Rc::new(|item: &String, _index: usize| {
+    ///     rsx! {
+    ///         Text {
+    ///             content: item.clone(),
+    ///         }
+    ///     }
+    /// });
+    /// ```
     pub render_item: Option<Rc<dyn Fn(&T, usize) -> Rc<dyn Component>>>,
+    /// Optional function for generating a unique key for an element.
+    /// Used for efficient list updates.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// key_fn: Some(Rc::new(|item: &String, index: usize| {
+    ///     format!("item-{}", index)
+    /// }))
+    /// ```
     pub key_fn: Option<Rc<dyn Fn(&T, usize) -> String>>,
+    /// Children components (used when `render_item` is not provided)
     pub children: Children,
+    /// Optional styles for the list (padding, width, height)
     pub style: Option<Rc<crate::core::ui::ui_kit::style::Style>>,
 }
 
@@ -101,4 +130,3 @@ impl<T> Default for List<T> {
         Self::new()
     }
 }
-

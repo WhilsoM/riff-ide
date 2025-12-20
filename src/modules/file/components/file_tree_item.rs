@@ -100,12 +100,20 @@ pub fn FileTreeItem(
         })) as Rc<dyn Component>
     }
 
-    let style = StyleSheet::new().with(
-        "container",
-        Style::new()
-            .padding_horizontal(8.0)
-            .background_color(theme_clone.bg_main_200),
-    );
+    let style = StyleSheet::new()
+        .with(
+            "container",
+            Style::new()
+                .padding_horizontal(8.0)
+                .background_color(theme_clone.bg_main_200),
+        )
+        .with(
+            "row",
+            Style::new()
+                .flex_direction(FlexDirection::Row)
+                .padding_horizontal(8.0)
+                .background_color(theme_clone.bg_main_200),
+        );
 
     rsx! {
         View {

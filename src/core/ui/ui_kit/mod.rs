@@ -1,5 +1,6 @@
 pub mod button;
 pub mod central_panel;
+pub mod color;
 pub mod image;
 pub mod list;
 pub mod scroll_area;
@@ -12,7 +13,8 @@ pub mod text_edit;
 pub mod view;
 
 pub use button::Button;
-pub use central_panel::{render_central_panel, CentralPanel};
+pub use central_panel::{CentralPanel, render_central_panel};
+pub use color::Color;
 pub use image::Image;
 pub use list::List;
 pub use scroll_area::ScrollArea;

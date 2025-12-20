@@ -7,11 +7,46 @@ pub struct TextEdit {
     props: TextEditProps,
 }
 
+/// Properties for the `TextEdit` component - a text input field.
+///
+/// Example usage in `rsx!`:
+/// ```rust,no_run
+/// let text = Rc::new(RefCell::new("Initial text".to_string()));
+/// rsx! {
+///     TextEdit {
+///         value: text.clone(),
+///         multiline: false,
+///         font: Some("monospace".to_string()),
+///     }
+/// }
+/// ```
 #[derive(Clone, Default)]
 pub struct TextEditProps {
+    /// The text value wrapped in `Rc<RefCell<String>>` for mutable access.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// let text = Rc::new(RefCell::new(String::new()));
+    /// value: text.clone()
+    /// ```
     pub value: Rc<RefCell<String>>,
+    /// Whether the text edit is multiline (textarea) or single line.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// multiline: true   // Multi-line text area
+    /// multiline: false  // Single-line input
+    /// ```
     pub multiline: bool,
+    /// Optional font name. Currently supports "monospace".
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// font: Some("monospace".to_string())
+    /// font: None  // Use default font
+    /// ```
     pub font: Option<String>,
+    /// Child components (rarely used for TextEdit).
     pub children: Children,
 }
 

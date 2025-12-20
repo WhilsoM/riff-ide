@@ -5,9 +5,26 @@ pub struct Text {
     props: TextProps,
 }
 
+/// Properties for the `Text` component.
+///
+/// Example usage in `rsx!`:
+/// ```rust,no_run
+/// rsx! {
+///     Text {
+///         content: "Hello, World!".to_string(),
+///     }
+/// }
+/// ```
 #[derive(Clone, Default)]
 pub struct TextProps {
+    /// The text content to display.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// content: "Hello, World!".to_string()
+    /// ```
     pub content: String,
+    /// Child components (rarely used for Text).
     pub children: Children,
 }
 

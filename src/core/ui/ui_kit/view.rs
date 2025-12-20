@@ -7,13 +7,76 @@ pub struct View {
     props: ViewProps,
 }
 
+/// Properties for the `View` component - a flexible container.
+///
+/// Example usage in `rsx!`:
+/// ```rust,no_run
+/// rsx! {
+///     View {
+///         align: "start".to_string(),
+///         justify: "center".to_string(),
+///         padding: Some(10.0),
+///         spacing: Some(8.0),
+///         children: {
+///             Text {
+///                 content: "Content".to_string(),
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[derive(Clone, Default)]
 pub struct ViewProps {
+    /// Alignment of children: "start", "center", or "end".
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// align: "start".to_string()  // Align to start
+    /// align: "center".to_string() // Center align
+    /// align: "end".to_string()    // Align to end
+    /// ```
     pub align: String,
+    /// Justification of children: "start", "center", or "end".
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// justify: "start".to_string()
+    /// ```
     pub justify: String,
+    /// Child components to render inside the view.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// children: {
+    ///     Text { content: "Item 1".to_string() };
+    ///     Text { content: "Item 2".to_string() }
+    /// }
+    /// ```
     pub children: Children,
+    /// Optional padding value (applied uniformly).
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// padding: Some(10.0)  // 10px padding on all sides
+    /// ```
     pub padding: Option<f32>,
+    /// Optional spacing between children.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// spacing: Some(8.0)  // 8px spacing between items
+    /// ```
     pub spacing: Option<f32>,
+    /// Optional style object for advanced styling (background, borders, etc.).
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// style: Some(Rc::new(Style {
+    ///     background_color: Some(egui::Color32::from_rgb(255, 0, 0)),
+    ///     padding: Some(egui::vec2(10.0, 10.0)),
+    ///     ..Default::default()
+    /// }))
+    /// ```
     pub style: Option<Rc<Style>>,
 }
 

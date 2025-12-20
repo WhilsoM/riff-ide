@@ -5,10 +5,36 @@ pub struct Image {
     props: ImageProps,
 }
 
+/// Properties for the `Image` component.
+///
+/// Example usage in `rsx!`:
+/// ```rust,no_run
+/// let texture_id = load_texture(ctx);
+/// rsx! {
+///     Image {
+///         texture_id: Some(texture_id),
+///         size: Some(egui::Vec2::new(64.0, 64.0)),
+///     }
+/// }
+/// ```
 #[derive(Clone, Default)]
 pub struct ImageProps {
+    /// The texture ID to display. Required for the image to be visible.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// texture_id: Some(icon_texture_id)
+    /// ```
     pub texture_id: Option<egui::TextureId>,
+    /// Optional size of the image. Defaults to 16x16 if not specified.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// size: Some(egui::Vec2::new(32.0, 32.0))  // 32x32 pixels
+    /// size: Some(egui::Vec2::new(64.0, 64.0))  // 64x64 pixels
+    /// ```
     pub size: Option<egui::Vec2>,
+    /// Child components (rarely used for Image).
     pub children: Children,
 }
 

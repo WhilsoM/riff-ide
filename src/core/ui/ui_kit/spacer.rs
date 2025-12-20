@@ -5,9 +5,34 @@ pub struct Spacer {
     props: SpacerProps,
 }
 
+/// Properties for the `Spacer` component - adds empty space.
+///
+/// Example usage in `rsx!`:
+/// ```rust,no_run
+/// rsx! {
+///     View {
+///         align: "start".to_string(),
+///         justify: "start".to_string(),
+///         children: {
+///             Text { content: "Left".to_string() };
+///             Spacer { size: 20.0 };
+///             Text { content: "Right".to_string() }
+///         }
+///     }
+/// }
+/// ```
 #[derive(Clone, Default)]
 pub struct SpacerProps {
+    /// The size of the spacer in pixels.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// size: 10.0  // 10px spacing
+    /// size: 20.0  // 20px spacing
+    /// size: 50.0  // 50px spacing
+    /// ```
     pub size: f32,
+    /// Child components (rarely used for Spacer).
     pub children: Children,
 }
 
