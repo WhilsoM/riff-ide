@@ -66,7 +66,23 @@ impl Component for View {
                 frame = frame.corner_radius(egui::CornerRadius::same(radius.min(255.0) as u8));
             }
 
-            if let Some(padding) = style.padding {
+            let has_individual_padding = style.padding_left.is_some()
+                || style.padding_right.is_some()
+                || style.padding_top.is_some()
+                || style.padding_bottom.is_some();
+
+            if has_individual_padding {
+                let left = style.padding_left.unwrap_or(0.0).min(127.0) as i8;
+                let right = style.padding_right.unwrap_or(0.0).min(127.0) as i8;
+                let top = style.padding_top.unwrap_or(0.0).min(127.0) as i8;
+                let bottom = style.padding_bottom.unwrap_or(0.0).min(127.0) as i8;
+                frame = frame.inner_margin(egui::Margin {
+                    left,
+                    right,
+                    top,
+                    bottom,
+                });
+            } else if let Some(padding) = style.padding {
                 let padding_val = padding.x.max(padding.y).min(127.0) as i8;
                 frame = frame.inner_margin(egui::Margin::same(padding_val));
             } else if let Some(padding_val) = self.props.padding {

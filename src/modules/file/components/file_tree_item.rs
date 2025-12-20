@@ -7,6 +7,7 @@ use crate::core::lib::rsx::component::ComponentWrapper;
 use crate::core::models::Entry;
 use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::ui::ui_kit::style::{FlexDirection, Style};
+use crate::core::ui::ui_kit::StyleSheet;
 use crate::core::ui::ui_kit::{Image, SelectableLabel, Spacer, View};
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::file::stores::file_interactions::FileInteractionsStore;
@@ -99,10 +100,18 @@ pub fn FileTreeItem(
         })) as Rc<dyn Component>
     }
 
+    let style = StyleSheet::new().with(
+        "container",
+        Style::new()
+            .padding_horizontal(8.0)
+            .background_color(theme_clone.bg_main_200),
+    );
+
     rsx! {
         View {
             align: "start".to_string(),
             justify: "start".to_string(),
+            style: style.get("container"),
             children: {
                 View {
                     align: "start".to_string(),

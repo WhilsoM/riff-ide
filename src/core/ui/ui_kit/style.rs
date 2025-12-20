@@ -1,4 +1,5 @@
 use eframe::egui;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 #[derive(Clone, Default)]
@@ -103,6 +104,18 @@ impl Style {
         self
     }
 
+    pub fn padding_horizontal(mut self, padding: f32) -> Self {
+        self.padding_left = Some(padding);
+        self.padding_right = Some(padding);
+        self
+    }
+
+    pub fn padding_vertical(mut self, padding: f32) -> Self {
+        self.padding_top = Some(padding);
+        self.padding_bottom = Some(padding);
+        self
+    }
+
     pub fn margin(mut self, margin: f32) -> Self {
         self.margin = Some(egui::Vec2::new(margin, margin));
         self
@@ -160,8 +173,6 @@ impl Style {
     }
 }
 
-// TODO: add .with() function to StyleSheet to add styles from one line
-// StyleSheet::new().with("container", gap(8.0).padding(8.0));
 pub struct StyleSheet {
     pub container: Rc<Style>,
     pub button_container: Rc<Style>,
@@ -171,6 +182,7 @@ pub struct StyleSheet {
     pub file_item_hover: Option<Rc<Style>>,
     pub text_primary: Option<Rc<Style>>,
     pub text_secondary: Option<Rc<Style>>,
+    custom_styles: HashMap<String, Rc<Style>>,
 }
 
 impl StyleSheet {
@@ -189,6 +201,7 @@ impl StyleSheet {
             file_item_hover: None,
             text_primary: None,
             text_secondary: None,
+            custom_styles: HashMap::new(),
         }
     }
 
@@ -197,6 +210,29 @@ impl StyleSheet {
         F: FnOnce() -> Self,
     {
         f()
+    }
+
+    pub fn with(mut self, name: &str, style: Style) -> Self {
+        self.custom_styles.insert(name.to_string(), Rc::new(style));
+        self
+    }
+
+    pub fn get(&self, name: &str) -> Option<Rc<Style>> {
+        if let Some(style) = self.custom_styles.get(name) {
+            return Some(style.clone());
+        }
+
+        match name {
+            "container" => Some(self.container.clone()),
+            "button_container" => Some(self.button_container.clone()),
+            "explorer_panel" => self.explorer_panel.clone(),
+            "editor_panel" => self.editor_panel.clone(),
+            "file_item" => self.file_item.clone(),
+            "file_item_hover" => self.file_item_hover.clone(),
+            "text_primary" => self.text_primary.clone(),
+            "text_secondary" => self.text_secondary.clone(),
+            _ => None,
+        }
     }
 }
 
