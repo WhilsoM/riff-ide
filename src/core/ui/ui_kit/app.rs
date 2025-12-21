@@ -95,6 +95,7 @@ fn render_top_panel(ctx: &egui::Context, id: &str, children: Rc<dyn Component>) 
     egui::TopBottomPanel::top(egui::Id::new(id))
         .frame(egui::Frame::new().fill(ctx.style().visuals.panel_fill))
         .show(ctx, |ui| {
+            ui.set_width(ui.available_width());
             children.render(ui);
         });
 }

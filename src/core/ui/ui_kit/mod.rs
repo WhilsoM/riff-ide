@@ -9,6 +9,7 @@ pub mod selectable_label;
 pub mod separator;
 pub mod spacer;
 pub mod style;
+pub mod style_applicator;
 pub mod text;
 pub mod text_edit;
 pub mod view;

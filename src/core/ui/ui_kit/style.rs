@@ -71,6 +71,27 @@ use std::rc::Rc;
 /// ```
 #[derive(Clone, Default)]
 pub struct Style {
+    /// Alignment of children: "start", "center", or "end".
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// align: Align::Start   // Align to start
+    /// align: Align::Center  // Center align
+    /// align: Align::End     // Align to end
+    /// ```
+    pub align: Option<Align>,
+    /// Justification of children: "start", "center", or "end".
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// justify: Justify::Start   // Align to start
+    /// justify: Justify::Center  // Center align
+    /// justify: Justify::End     // Align to end
+    /// justify: Justify::SpaceBetween  // Space between items
+    /// justify: Justify::SpaceAround  // Space around items
+    /// justify: Justify::SpaceEvenly  // Space evenly between items
+    /// ```
+    pub justify: Option<Justify>,
     /// Background color of the component.
     ///
     /// Example:
@@ -204,7 +225,7 @@ pub struct Style {
     /// ```
     pub justify_content: Option<JustifyContent>,
     /// Flex grow factor.
-    pub flex: Option<f32>,
+    pub flex: Option<i8>,
     /// Gap between flex items.
     ///
     /// Example:
@@ -269,6 +290,48 @@ pub enum FlexDirection {
     RowReverse,
     /// Vertical layout (bottom to top).
     ColumnReverse,
+}
+
+/// Alignment of children.
+///
+/// Example:
+/// ```rust,no_run
+/// .align(Align::Start)   // Align to start
+/// .align(Align::Center)  // Center align
+/// .align(Align::End)     // Align to end
+/// ```
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Align {
+    /// Align to start.
+    Start,
+    /// Center align.
+    Center,
+    /// Align to end.
+    End,
+}
+
+/// Justification of children.
+///
+/// Example:
+/// ```rust,no_run
+/// .justify(Justify::Start)   // Align to start
+/// .justify(Justify::Center)  // Center align
+/// .justify(Justify::End)     // Align to end
+/// ```
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Justify {
+    /// Align to start.
+    Start,
+    /// Center align.
+    Center,
+    /// Align to end.
+    End,
+    /// Space between items.
+    SpaceBetween,
+    /// Space around items.
+    SpaceAround,
+    /// Space evenly between items.
+    SpaceEvenly,
 }
 
 /// Alignment of items along the cross axis in flex container.
@@ -367,6 +430,17 @@ impl Style {
     /// ```
     pub fn border_color(mut self, color: impl Into<egui::Color32>) -> Self {
         self.border_color = Some(color.into());
+        self
+    }
+
+    /// Set flex grow factor.
+    ///
+    /// Example:
+    /// ```rust,no_run
+    /// .flex(1)  // Flex grow factor
+    /// ```
+    pub fn flex(mut self, flex: i8) -> Self {
+        self.flex = Some(flex);
         self
     }
 
@@ -559,10 +633,12 @@ impl Style {
     ///
     /// Example:
     /// ```rust,no_run
-    /// .align_items(AlignItems::Center)  // Center align
+    /// .align(Align::Start)  // Start align
+    /// .align(Align::Center)  // Center align
+    /// .align(Align::End)  // End align
     /// ```
-    pub fn align_items(mut self, align: AlignItems) -> Self {
-        self.align_items = Some(align);
+    pub fn align(mut self, align: Align) -> Self {
+        self.align = Some(align);
         self
     }
 
@@ -572,8 +648,8 @@ impl Style {
     /// ```rust,no_run
     /// .justify_content(JustifyContent::SpaceBetween)  // Space between items
     /// ```
-    pub fn justify_content(mut self, justify: JustifyContent) -> Self {
-        self.justify_content = Some(justify);
+    pub fn justify(mut self, justify: Justify) -> Self {
+        self.justify = Some(justify);
         self
     }
 
