@@ -2,13 +2,12 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use eframe::egui;
-
-use crate::core::core::ActionsStore;
 use crate::core::ui::ui_kit::{
     Button, CentralPanel, ScrollArea, Separator, Style, StyleSheet, Text, TextEdit, View,
     render_central_panel,
 };
+
+use eframe::egui;
 
 use crate::modules::editor::stores::theme_store;
 use crate::rsx;
@@ -16,37 +15,25 @@ use crate::rsx;
 pub struct CodeEditor {
     opened_file: Option<PathBuf>,
     opened_text: Rc<RefCell<String>>,
-    actions_store: Rc<RefCell<ActionsStore>>,
 }
 
 impl CodeEditor {
-    pub fn new(
-        opened_file: Option<PathBuf>,
-        opened_text: Rc<RefCell<String>>,
-        actions_store: Rc<RefCell<ActionsStore>>,
-    ) -> Self {
+    pub fn new(opened_file: Option<PathBuf>, opened_text: Rc<RefCell<String>>) -> Self {
         Self {
             opened_file,
             opened_text,
-            actions_store,
         }
     }
 
     pub fn render(&self, ctx: &egui::Context) {
         if let Some(path) = &self.opened_file {
-            let _increment_handler = {
-                let store = Rc::clone(&self.actions_store);
-                let ctx = ctx.clone();
-                Rc::new(move || {
-                    store.borrow().increment(&ctx);
-                })
-            };
-
             let file_name = path.file_name().unwrap().to_string_lossy();
             let text_value = self.opened_text.clone();
             let theme = theme_store();
             let theme_style_100 = theme.bg_main_100_style(ctx);
             let theme_style_text = theme.text_primary_style(ctx);
+
+            println!("Rendering code editor text: {:?}", text_value);
 
             let style = StyleSheet::new().with(
                 "file_container",

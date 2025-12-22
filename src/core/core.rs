@@ -11,41 +11,18 @@ use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::ui::ui_kit::render_app;
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::editor::components::App;
+use crate::modules::editor::stores::file::file_interactions::file_interactions_store::{
+    self, file_interactions_store,
+};
 use crate::modules::editor::stores::{
     EditorInteractionsStore, FileActionsStore, FileInteractionsStore, ThemeInteractionsStore,
 };
 use crate::store;
 
-#[derive(Debug, Clone)]
-pub struct Counter {
-    pub counter: usize,
-}
-
-store! {
-    #[derive(Debug)]
-    pub struct ActionsStore {
-        items: Vec<Counter> = vec![Counter{counter:1}, Counter{counter:2}, Counter{counter:3}],
-        counter: u32 = 0,
-    }
-
-    increment(&self, ctx: &egui::Context) {
-        let mut reactive = self.reactive(ctx);
-        *reactive.counter() += 1;
-    }
-
-    update_item(&self, ctx: &egui::Context, i: usize) {
-        let mut reactive = self.reactive(ctx);
-        if let Some(elem) = reactive.items().get_mut(i) {
-            elem.counter += 1;
-        }
-    }
-}
-
 pub struct MyApp {
     current_dir: PathBuf,
     files: Vec<Entry>,
     icons: Rc<IconsInteractionsStore>,
-    actions_store: Rc<RefCell<ActionsStore>>,
     app_name_store: AppNameStore,
     file_actions: Rc<RefCell<FileActionsStore>>,
     file_interactions: Rc<RefCell<FileInteractionsStore>>,
@@ -63,7 +40,6 @@ impl MyApp {
     ) -> Self {
         let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
         let files = read_current_folder(&current_dir);
-        let actions_store = Rc::new(RefCell::new(ActionsStore::new()));
 
         let file_actions = Rc::new(RefCell::new(FileActionsStore::new()));
         let file_interactions = Rc::new(RefCell::new(FileInteractionsStore::new()));
@@ -74,7 +50,6 @@ impl MyApp {
             current_dir,
             files,
             icons: Rc::new(icons),
-            actions_store,
             app_name_store,
             file_actions,
             file_interactions,
@@ -112,8 +87,11 @@ impl eframe::App for MyApp {
 
         use crate::modules::editor::stores::editor_interactions_store;
         use crate::modules::editor::stores::file::file_actions::file_actions_store;
+        use crate::modules::editor::stores::file::file_interactions::file_interactions_store;
         if let Some(UiAction::OpenFile(path)) = self.file_interactions.borrow_mut().take_action() {
-            file_actions_store().open_file(ctx, path.clone());
+            // связка тут
+            // file_actions_store().open_file(ctx, path.clone());
+            // file_interactions_store().handle_file_click(&path);
             editor_interactions_store().open_tab(ctx, path);
         }
 

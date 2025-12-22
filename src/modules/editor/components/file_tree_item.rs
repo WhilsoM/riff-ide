@@ -44,12 +44,16 @@ pub fn FileTreeItem(
         (icon_texture, name, ftype, path)
     };
 
+    let ctx_for_handler = ctx.clone();
+
     let click_handler = {
         let entry = entry_clone.clone();
         let path_clone = path.clone();
         let ftype_clone = ftype.clone();
+
         Rc::new(move || {
             let mut entry = entry.borrow_mut();
+
             match ftype_clone {
                 FileType::Folder => {
                     entry.is_open = !entry.is_open;
@@ -58,7 +62,9 @@ pub fn FileTreeItem(
                     }
                 }
                 FileType::File => {
-                    interactions.borrow_mut().handle_file_click(&path_clone);
+                    interactions
+                        .borrow_mut()
+                        .handle_file_click(&ctx_for_handler, &path_clone);
                 }
                 _ => {}
             }
@@ -74,17 +80,20 @@ pub fn FileTreeItem(
 
     let children_components: Vec<Element> = {
         let entry_borrowed = entry.borrow();
-        if entry_borrowed.is_open && !entry_borrowed.children.is_empty() {
+        if entry_borrowed.is_open {
             entry_borrowed
                 .children
                 .iter()
-                .map(|child| {
-                    let child_ref = Rc::new(RefCell::new(child.clone()));
-                    FileTreeItem(child_ref, indent + 1, ctx.clone())
+                .map(|child_rc| {
+                    FileTreeItem(
+                        Rc::new(RefCell::new(child_rc.clone())),
+                        indent + 1,
+                        ctx.clone(),
+                    )
                 })
                 .collect()
         } else {
-            Vec::new()
+            vec![]
         }
     };
 

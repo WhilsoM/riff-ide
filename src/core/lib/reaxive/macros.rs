@@ -6,7 +6,7 @@ macro_rules! store {
             $($fname:ident : $ftype:ty = $default:expr),* $(,)?
         }
         $(
-            $method_name:ident ($($params:tt)*) $body:block
+            $method_name:ident ( $($params:tt)* ) $(-> $ret:ty)? $body:block
         )*
     ) => {
         $(#[$struct_meta])*
@@ -21,9 +21,10 @@ macro_rules! store {
         }
 
         thread_local! {
-            static INSTANCE: std::cell::RefCell<$name> = std::cell::RefCell::new($name {
-                $($fname: crate::core::lib::reaxive::reactive::ReField::new($default)),*
-            });
+            static INSTANCE: std::cell::RefCell<$name> =
+                std::cell::RefCell::new($name {
+                    $($fname: crate::core::lib::reaxive::reactive::ReField::new($default)),*
+                });
         }
 
         impl $name {
@@ -33,7 +34,10 @@ macro_rules! store {
                 }
             }
 
-            pub fn reactive<'a>(&'a self, ctx: &'a eframe::egui::Context) -> ReactiveAccess<'a> {
+            pub fn reactive<'a>(
+                &'a self,
+                ctx: &'a eframe::egui::Context
+            ) -> ReactiveAccess<'a> {
                 ReactiveAccess {
                     store: self,
                     ctx,
@@ -42,19 +46,25 @@ macro_rules! store {
             }
 
             pub fn instance() -> std::cell::Ref<'static, $name> {
-                INSTANCE.with(|s| {
-                    unsafe { std::mem::transmute(s.borrow()) }
+                INSTANCE.with(|s| unsafe {
+                    std::mem::transmute::<
+                        std::cell::Ref<'_, $name>,
+                        std::cell::Ref<'static, $name>
+                    >(s.borrow())
                 })
             }
 
             pub fn instance_mut() -> std::cell::RefMut<'static, $name> {
-                INSTANCE.with(|s| {
-                    unsafe { std::mem::transmute(s.borrow_mut()) }
+                INSTANCE.with(|s| unsafe {
+                    std::mem::transmute::<
+                        std::cell::RefMut<'_, $name>,
+                        std::cell::RefMut<'static, $name>
+                    >(s.borrow_mut())
                 })
             }
 
             $(
-                pub fn $method_name ($($params)*) $body
+                pub fn $method_name ( $($params)* ) $(-> $ret)? $body
             )*
         }
 
@@ -80,6 +90,5 @@ macro_rules! store {
                 }
             }
         }
-
     };
 }
