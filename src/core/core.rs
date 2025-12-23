@@ -11,13 +11,9 @@ use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::ui::ui_kit::render_app;
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::editor::components::App;
-use crate::modules::editor::stores::file::file_interactions::file_interactions_store::{
-    self, file_interactions_store,
-};
 use crate::modules::editor::stores::{
     EditorInteractionsStore, FileActionsStore, FileInteractionsStore, ThemeInteractionsStore,
 };
-use crate::store;
 
 pub struct MyApp {
     current_dir: PathBuf,
@@ -28,7 +24,6 @@ pub struct MyApp {
     file_interactions: Rc<RefCell<FileInteractionsStore>>,
     editor_interactions: Rc<RefCell<EditorInteractionsStore>>,
     theme: Rc<ThemeInteractionsStore>,
-    is_dirty: bool,
 }
 
 impl MyApp {
@@ -55,7 +50,6 @@ impl MyApp {
             file_interactions,
             editor_interactions,
             theme,
-            is_dirty: false,
         }
     }
 }
@@ -86,12 +80,7 @@ impl eframe::App for MyApp {
         ctx.set_visuals(visuals);
 
         use crate::modules::editor::stores::editor_interactions_store;
-        use crate::modules::editor::stores::file::file_actions::file_actions_store;
-        use crate::modules::editor::stores::file::file_interactions::file_interactions_store;
         if let Some(UiAction::OpenFile(path)) = self.file_interactions.borrow_mut().take_action() {
-            // связка тут
-            // file_actions_store().open_file(ctx, path.clone());
-            // file_interactions_store().handle_file_click(&path);
             editor_interactions_store().open_tab(ctx, path);
         }
 

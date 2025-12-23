@@ -1,4 +1,4 @@
-use crate::core::lib::rsx::component::{Children, Component, ComponentWithProps, ComponentWrapper};
+use crate::core::lib::rsx::component::{Children, Component, ComponentWithProps};
 use eframe::egui;
 use std::rc::Rc;
 

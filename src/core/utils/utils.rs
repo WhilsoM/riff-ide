@@ -16,7 +16,7 @@ pub fn read_current_folder(path: &PathBuf) -> Vec<Entry> {
             let file_name = entry.file_name();
 
             if let Ok(name) = file_name.into_string() {
-                // todo: если файл скрыт от не показывать его
+                // todo: если файл скрыт то не показывать его
                 if name == ".git" || name == ".DS_Store" {
                     continue;
                 }

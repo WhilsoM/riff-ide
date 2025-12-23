@@ -6,7 +6,7 @@
 use eframe::egui::{self, Align};
 
 use super::style::Style;
-use crate::core::ui::ui_kit::style::{FlexDirection, Justify, JustifyContent};
+use crate::core::ui::ui_kit::style::{FlexDirection, Justify};
 
 /// Applies style properties to an egui::Frame.
 ///

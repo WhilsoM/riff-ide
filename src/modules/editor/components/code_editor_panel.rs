@@ -1,5 +1,5 @@
 use crate::core::lib::rsx::component::Element;
-use crate::core::ui::ui_kit::{Button, CentralPanel, ScrollArea, Separator, Text, TextEdit, View};
+use crate::core::ui::ui_kit::{Button, CentralPanel, ScrollArea, Text, TextEdit, View};
 use crate::modules::editor::components::TabsBar;
 use crate::modules::editor::stores::editor::editor_interactions::editor_interactions_store;
 use crate::modules::editor::stores::theme_store;

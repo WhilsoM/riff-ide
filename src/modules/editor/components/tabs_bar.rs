@@ -2,9 +2,8 @@ use std::rc::Rc;
 
 use crate::core::lib::rsx::Children;
 use crate::core::lib::rsx::component::Element;
-use crate::core::ui::ui_kit::button::ButtonStyle;
 use crate::core::ui::ui_kit::style::{Align, Display, FlexDirection, Justify};
-use crate::core::ui::ui_kit::{Button, Color, SelectableLabel, Style, StyleSheet, Text, View};
+use crate::core::ui::ui_kit::{Button, Style, StyleSheet, Text, View};
 use crate::modules::editor::stores::{Tab, editor_interactions_store, theme_store};
 use crate::rsx;
 use riff_rsx_macro::component;

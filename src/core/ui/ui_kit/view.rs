@@ -139,7 +139,7 @@ impl Component for View {
             frame = frame.inner_margin(egui::Margin::same(padding_val));
         }
 
-        let render_content = |ui: &mut egui::Ui, container_width: Option<f32>| {
+        let render_content = |ui: &mut egui::Ui, _: Option<f32>| {
             let justify = get_justify(&self.props.justify);
             let (main_align, main_justify) = justify_to_egui(justify);
 
