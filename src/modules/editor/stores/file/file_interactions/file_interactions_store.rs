@@ -24,7 +24,7 @@ store! {
 
       // TODO: показывать что такие файлы нельзя открыть "test_rsx" (без расширения)
       if let Some(file) = path.file_name() {
-          if !file.to_string_lossy().contains(".") {
+          if !file.to_string_lossy().contains(".") || file.to_string_lossy().contains("rlib") {
               return;
           }
       }

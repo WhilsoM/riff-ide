@@ -1,4 +1,9 @@
-use crate::core::lib::rsx::component::{Children, Component, ComponentWithProps};
+use std::rc::Rc;
+
+use crate::core::{
+    lib::rsx::component::{Children, Component, ComponentWithProps},
+    ui::ui_kit::Style,
+};
 use eframe::egui;
 
 pub struct Button {
@@ -57,7 +62,7 @@ pub struct ButtonProps {
     ///     ..Default::default()
     /// })
     /// ```
-    pub style: Option<ButtonStyle>,
+    pub style: Option<Rc<Style>>,
 }
 
 impl Default for ButtonProps {
@@ -98,7 +103,7 @@ pub type Props = ButtonProps;
 ///     padding: Some(egui::Vec2::new(12.0, 6.0)),
 /// }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ButtonStyle {
     /// Optional fixed width of the button.
     ///
@@ -136,18 +141,11 @@ pub struct ButtonStyle {
     /// padding: Some(egui::Vec2::new(12.0, 6.0))  // 12px horizontal, 6px vertical
     /// ```
     pub padding: Option<egui::Vec2>,
-}
-
-impl Default for ButtonStyle {
-    fn default() -> Self {
-        Self {
-            width: None,
-            height: None,
-            min_width: Some(100.0),
-            min_height: Some(30.0),
-            padding: Some(egui::Vec2::new(12.0, 6.0)),
-        }
-    }
+    /// Optional style implemented from Style
+    /// ```rust,no_run
+    /// background_color: Some(Color::BLACK)
+    /// ```
+    pub style: Option<Rc<Style>>,
 }
 
 impl Button {

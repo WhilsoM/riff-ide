@@ -2,7 +2,8 @@ use std::rc::Rc;
 
 use crate::core::lib::rsx::Children;
 use crate::core::lib::rsx::component::Element;
-use crate::core::ui::ui_kit::style::{Display, FlexDirection};
+use crate::core::ui::ui_kit::button::ButtonStyle;
+use crate::core::ui::ui_kit::style::{Align, Display, FlexDirection, Justify};
 use crate::core::ui::ui_kit::{Button, Color, SelectableLabel, Style, StyleSheet, Text, View};
 use crate::modules::editor::stores::{Tab, editor_interactions_store, theme_store};
 use crate::rsx;
@@ -52,12 +53,20 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
             Style::new()
                 .padding_xy(6.0, 6.0)
                 .background_color(tab_bg_color)
+                .align(Align::Center)
+                .justify(Justify::SpaceBetween)
                 .width(100.0)
                 .flex_direction(FlexDirection::Row)
                 .border_width(1.0)
                 .border_color(theme.bg_main_300.get(&ctx)),
         )
-        .with("tab_text", Style::new().flex_direction(FlexDirection::Row));
+        .with("tab_text", Style::new().flex_direction(FlexDirection::Row))
+        .with(
+            "btn",
+            Style::new()
+                .background_color(tab_bg_color)
+                .border_color(theme.border_primary.get(&ctx)),
+        );
 
     let dirty_circle_style = Rc::new(
         Style::new()
@@ -72,8 +81,6 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
         rsx! {
             View {
                 style: s.get("tab"),
-                align: "center".to_string(),
-                justify: "space-between".to_string(),
                 children: {
                     View {
                         align: "center".to_string(),
@@ -91,6 +98,7 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
                     Button {
                         text: "×".to_string(),
                         on_click: Some(close_handler),
+                        style: s.get("btn"),
                         enabled: true,
                     }
                 }
@@ -108,14 +116,17 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
                         justify: "flex-start".to_string(),
                         style: s.get("tab_text"),
                         children: {
-                            Text {
-                                content: file_name.clone(),
+                            Button {
+                                text: file_name.clone(),
+                                on_click: Some(click_handler),
+                                enabled: true,
                             }
                         }
                     };
                     Button {
                         text: "×".to_string(),
                         on_click: Some(close_handler),
+                        style: s.get("btn"),
                         enabled: true,
                     }
                 }
