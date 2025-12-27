@@ -1,25 +1,21 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::core::enums::enums::{FileType, Icon};
 use crate::core::lib::rsx::component::Children;
 use crate::core::lib::rsx::component::Element;
-use crate::core::models::Entry;
+use crate::core::models::EntryRc;
 use crate::core::ui::ui_kit::StyleSheet;
-use crate::core::ui::ui_kit::style::{FlexDirection, Style};
+use crate::core::ui::ui_kit::style::{Align, FlexDirection, Style};
 use crate::core::ui::ui_kit::{Image, SelectableLabel, Spacer, View};
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::editor::stores::context::{get_file_interactions, get_icons};
 use crate::modules::editor::stores::theme_store;
 use crate::rsx;
+use eframe::egui::style;
 use riff_rsx_macro::component;
 
 #[component]
-pub fn FileTreeItem(
-    entry: Rc<RefCell<Entry>>,
-    indent: usize,
-    ctx: eframe::egui::Context,
-) -> Element {
+pub fn FileTreeItem(entry: EntryRc, indent: usize, ctx: eframe::egui::Context) -> Element {
     let icons = get_icons();
     let theme = theme_store();
     let interactions = get_file_interactions();
@@ -57,8 +53,13 @@ pub fn FileTreeItem(
             match ftype_clone {
                 FileType::Folder => {
                     entry.is_open = !entry.is_open;
+
                     if entry.is_open && entry.children.is_empty() {
                         entry.children = read_current_folder(&path_clone);
+                        println!(
+                            "ЗАГРУЖЕННЫЕ ДЕТИ ДЛЯ ПАПКИ {:?}: {:?}, {}",
+                            path_clone, entry.children, entry.is_open
+                        );
                     }
                 }
                 FileType::File => {
@@ -71,26 +72,29 @@ pub fn FileTreeItem(
         })
     };
 
-    let styles = StyleSheet::new().with(
-        "container",
-        Style::new()
-            .padding_horizontal(10.0)
-            .flex_direction(FlexDirection::Row),
-    );
+    let styles = StyleSheet::new()
+        .with(
+            "container",
+            Style::new()
+                .padding_horizontal(10.0)
+                .flex_direction(FlexDirection::Column),
+        )
+        .with(
+            "item",
+            Style::new()
+                .flex_direction(FlexDirection::Row)
+                .align(Align::Center)
+                .padding_vertical(1.0),
+        );
 
     let children_components: Vec<Element> = {
         let entry_borrowed = entry.borrow();
+
         if entry_borrowed.is_open {
             entry_borrowed
                 .children
                 .iter()
-                .map(|child_rc| {
-                    FileTreeItem(
-                        Rc::new(RefCell::new(child_rc.clone())),
-                        indent + 1,
-                        ctx.clone(),
-                    )
-                })
+                .map(|child_rc| FileTreeItem(child_rc.clone(), indent + 1, ctx.clone()))
                 .collect()
         } else {
             vec![]
@@ -105,23 +109,22 @@ pub fn FileTreeItem(
             children: Children::Multiple({
                 let mut ch = vec![
                     rsx! {
-                        Spacer {
-                            size: (indent * 12) as f32,
-                        }
-                    },
-                    rsx! {
-                        Image {
+                      View {
+                        style: styles.get("item"),
+                        children: {
+                          Image {
                             texture_id: Some(icon_texture),
-                        }
-                    },
-                    rsx! {
-                        SelectableLabel {
+                          };
+
+                          SelectableLabel {
                             selected: false,
                             text: name.clone(),
                             text_color: Some(theme.text_primary.get(&ctx)),
                             hover_color: Some(theme.bg_hover.get(&ctx)),
                             on_click: Some(click_handler.clone()),
+                          };
                         }
+                      }
                     },
                 ];
                 ch.extend(children_components);

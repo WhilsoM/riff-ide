@@ -1,16 +1,25 @@
 use std::{
+    cell::RefCell,
     fs,
     path::{Path, PathBuf},
+    rc::Rc,
 };
 
 use eframe::egui;
 
-use crate::core::{enums::enums::FileType, models::Entry};
+use crate::core::{
+    enums::enums::FileType,
+    models::{Entry, EntryRc},
+};
 
+// СКОРЕЕ ВСЕГО ЧТО ТО С ЭТОЙ ФУНКЦИЕЙ ИЛИ ОТОБРАЖЕНИЕМ В КОМПОНЕНТЕ ПОСМОТРЕТЬ fileList and FileTreeItem
 /// читать текущую директорию
 /// TODO: сделать функцию выбирание папки для чтения
-pub fn read_current_folder(path: &PathBuf) -> Vec<Entry> {
-    let mut entries: Vec<Entry> = Vec::new();
+pub fn read_current_folder(path: &PathBuf) -> Vec<EntryRc> {
+    let mut entries: Vec<EntryRc> = Vec::new();
+
+    println!("ЧТЕНИЕ ПАПКИ: {:?}", path);
+
     if let Ok(dir_entries) = fs::read_dir(path) {
         for entry in dir_entries.flatten() {
             let file_name = entry.file_name();
@@ -20,22 +29,29 @@ pub fn read_current_folder(path: &PathBuf) -> Vec<Entry> {
                 if name == ".git" || name == ".DS_Store" {
                     continue;
                 }
-
-                entries.push(Entry {
+                let entry_rc = Rc::new(RefCell::new(Entry {
                     path: entry.path(),
                     ftype: get_file_type(&entry.path()),
                     is_open: false,
-                    children: Vec::new(),
-                });
+                    children: Vec::new(), // 👈 тоже Rc внутри
+                }));
+
+                entries.push(entry_rc);
             }
         }
     }
 
-    entries.sort_by(|a, b| match (&a.ftype, &b.ftype) {
-        (FileType::Folder, FileType::File) => std::cmp::Ordering::Less,
-        (FileType::File, FileType::Folder) => std::cmp::Ordering::Greater,
-        _ => a.path.file_name().cmp(&b.path.file_name()),
+    entries.sort_by(|a, b| {
+        let a = a.borrow();
+        let b = b.borrow();
+
+        match (&a.ftype, &b.ftype) {
+            (FileType::Folder, FileType::File) => std::cmp::Ordering::Less,
+            (FileType::File, FileType::Folder) => std::cmp::Ordering::Greater,
+            _ => a.path.file_name().cmp(&b.path.file_name()),
+        }
     });
+    println!("ЗАГРУЖЕННЫЕ ЭНТРИ: {:?}", entries);
 
     entries
 }

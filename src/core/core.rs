@@ -4,26 +4,29 @@ use std::rc::Rc;
 
 use eframe::egui;
 
-use crate::core::enums::enums::UiAction;
-use crate::core::models::Entry;
+use crate::core::enums::enums::{Hotkeys, UiAction};
+use crate::core::models::EntryRc;
 use crate::core::stores::app_name_store::AppNameStore;
 use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::ui::ui_kit::render_app;
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::editor::components::App;
+use crate::modules::editor::stores::hotkeys::{HotkeysInteractionsStore, hotkeys_interactions};
 use crate::modules::editor::stores::{
     EditorInteractionsStore, FileActionsStore, FileInteractionsStore, ThemeInteractionsStore,
 };
 
 pub struct MyApp {
     current_dir: PathBuf,
-    files: Vec<Entry>,
+    files: Vec<EntryRc>,
     icons: Rc<IconsInteractionsStore>,
     app_name_store: AppNameStore,
     file_actions: Rc<RefCell<FileActionsStore>>,
     file_interactions: Rc<RefCell<FileInteractionsStore>>,
     editor_interactions: Rc<RefCell<EditorInteractionsStore>>,
+    hotkeys_interactions: Rc<RefCell<HotkeysInteractionsStore>>,
     theme: Rc<ThemeInteractionsStore>,
+    pending_actions: Vec<Hotkeys>,
 }
 
 impl MyApp {
@@ -41,6 +44,8 @@ impl MyApp {
         let editor_interactions = Rc::new(RefCell::new(EditorInteractionsStore::new()));
         let theme = Rc::new(ThemeInteractionsStore::new());
 
+        let hotkeys_interactions = Rc::new(RefCell::new(HotkeysInteractionsStore::new()));
+
         Self {
             current_dir,
             files,
@@ -50,12 +55,31 @@ impl MyApp {
             file_interactions,
             editor_interactions,
             theme,
+            hotkeys_interactions,
+            pending_actions: Vec::new(),
         }
     }
 }
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        let toggle_explorer = ctx.input(|i| i.modifiers.mac_cmd && i.key_pressed(egui::Key::B));
+        println!("Toggle explorer hotkey pressed: {}", toggle_explorer);
+
+        if toggle_explorer {
+            self.pending_actions.push(Hotkeys::ToggleExplorer);
+        }
+
+        // CLEAR PENDING ACTIONS
+        for action in self.pending_actions.drain(..) {
+            match action {
+                Hotkeys::ToggleExplorer => {
+                    self.hotkeys_interactions.borrow_mut().toggle_explorer(ctx);
+                }
+                _ => {}
+            }
+        }
+
         use crate::modules::editor::stores::theme_store;
         let theme = theme_store();
         let mut visuals = egui::Visuals::dark();
@@ -85,6 +109,7 @@ impl eframe::App for MyApp {
         }
 
         use crate::modules::editor::stores::context::{AppStores, set_all_stores};
+
         let files_rc = Rc::new(RefCell::new(self.files.clone()));
         set_all_stores(AppStores {
             editor_interactions: self.editor_interactions.clone(),
@@ -93,12 +118,11 @@ impl eframe::App for MyApp {
             file_actions: self.file_actions.clone(),
             icons: self.icons.clone(),
             files: files_rc.clone(),
+            hotkeys_interactions: self.hotkeys_interactions.clone(),
         });
 
         let app = App(ctx.clone());
 
         render_app(ctx, app);
-
-        self.files = files_rc.borrow().clone();
     }
 }

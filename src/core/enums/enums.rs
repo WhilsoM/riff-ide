@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum FileType {
     Folder,
     File,
@@ -19,4 +19,13 @@ pub enum Icon {
 pub enum UiAction {
     OpenFile(PathBuf),
     SaveFile(PathBuf),
+}
+
+#[derive(PartialEq, Clone, Debug)]
+pub enum Hotkeys {
+    ToggleExplorer, // cmd + b
+    CloseFile,      // cmd + w
+    FindFile,       // cmd + p
+    FindSettings,   // cmd + shift + p
+    FindText,       // cmd + f
 }

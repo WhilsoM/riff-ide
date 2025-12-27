@@ -1,4 +1,4 @@
-use crate::core::models::Entry;
+use crate::core::models::{Entry, EntryRc};
 use crate::core::utils::utils::read_current_folder;
 use std::path::PathBuf;
 
@@ -9,7 +9,7 @@ impl FileServicesStore {
         Self
     }
 
-    pub fn read_directory(&self, path: &PathBuf) -> Vec<Entry> {
+    pub fn read_directory(&self, path: &PathBuf) -> Vec<EntryRc> {
         read_current_folder(path)
     }
 

@@ -1,6 +1,7 @@
 pub mod context;
 pub mod editor;
 pub mod file;
+pub mod hotkeys;
 pub mod theme;
 
 pub use editor::editor_interactions::{EditorInteractionsStore, Tab, editor_interactions_store};

@@ -1,8 +1,9 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::core::models::Entry;
+use crate::core::models::{Entry, EntryRc};
 use crate::core::stores::icons::IconsInteractionsStore;
+use crate::modules::editor::stores::hotkeys::HotkeysInteractionsStore;
 use crate::modules::editor::stores::{
     EditorInteractionsStore, FileActionsStore, FileInteractionsStore, ThemeInteractionsStore,
 };
@@ -13,7 +14,8 @@ thread_local! {
     static FILE_INTERACTIONS: RefCell<Option<Rc<RefCell<FileInteractionsStore>>>> = RefCell::new(None);
     static FILE_ACTIONS: RefCell<Option<Rc<RefCell<FileActionsStore>>>> = RefCell::new(None);
     static ICONS: RefCell<Option<Rc<IconsInteractionsStore>>> = RefCell::new(None);
-    static FILES: RefCell<Option<Rc<RefCell<Vec<Entry>>>>> = RefCell::new(None);
+    static FILES: RefCell<Option<Rc<RefCell<Vec<EntryRc>>>>> = RefCell::new(None);
+    static HOTKEYS_INTERACTIONS: RefCell<Option<Rc<RefCell<HotkeysInteractionsStore>>>> = RefCell::new(None);
 }
 
 pub fn set_editor_interactions(store: Rc<RefCell<EditorInteractionsStore>>) {
@@ -81,12 +83,21 @@ pub fn get_icons() -> Rc<IconsInteractionsStore> {
     })
 }
 
-pub fn set_files(files: Rc<RefCell<Vec<Entry>>>) {
+pub fn set_files(files: Rc<RefCell<Vec<EntryRc>>>) {
     FILES.with(|s| *s.borrow_mut() = Some(files));
 }
 
-pub fn get_files() -> Rc<RefCell<Vec<Entry>>> {
+pub fn get_files() -> Rc<RefCell<Vec<EntryRc>>> {
     FILES.with(|s| s.borrow().as_ref().expect("Files not initialized").clone())
+}
+
+pub fn hotkeys_interactions() -> Rc<RefCell<HotkeysInteractionsStore>> {
+    HOTKEYS_INTERACTIONS.with(|s| {
+        s.borrow()
+            .as_ref()
+            .expect("hotkeys interactions not initialized")
+            .clone()
+    })
 }
 
 pub struct AppStores {
@@ -95,7 +106,8 @@ pub struct AppStores {
     pub file_interactions: Rc<RefCell<FileInteractionsStore>>,
     pub file_actions: Rc<RefCell<FileActionsStore>>,
     pub icons: Rc<IconsInteractionsStore>,
-    pub files: Rc<RefCell<Vec<Entry>>>,
+    pub files: Rc<RefCell<Vec<EntryRc>>>,
+    pub hotkeys_interactions: Rc<RefCell<HotkeysInteractionsStore>>,
 }
 
 pub fn set_all_stores(stores: AppStores) {

@@ -2,18 +2,19 @@ use eframe::egui::{self};
 
 use crate::core::{
     enums::enums::{FileType, Icon, UiAction},
-    models::Entry,
+    models::EntryRc,
     stores::icons::IconsInteractionsStore,
     utils::utils::read_current_folder,
 };
-
 pub fn draw_entry(
     ui: &mut egui::Ui,
-    entry: &mut Entry,
+    entry: &EntryRc,
     icons: &IconsInteractionsStore,
     indent: usize,
 ) -> Option<UiAction> {
     let mut action = None;
+
+    let mut entry = entry.borrow_mut();
 
     ui.horizontal(|ui| {
         ui.add_space((indent * 12) as f32);
@@ -40,14 +41,17 @@ pub fn draw_entry(
                 FileType::File => {
                     action = Some(UiAction::OpenFile(entry.path.clone()));
                 }
-                _ => {}
+                FileType::Symlink => action = None,
             }
         }
     });
 
     if entry.is_open {
-        for child in &mut entry.children {
-            if let Some(child_action) = draw_entry(ui, child, icons, indent + 1) {
+        let children = entry.children.clone();
+        drop(entry);
+
+        for child in children {
+            if let Some(child_action) = draw_entry(ui, &child, icons, indent + 1) {
                 action = Some(child_action);
             }
         }
