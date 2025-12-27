@@ -13,7 +13,7 @@ store! {
         bg_active: egui::Color32 = egui::Color32::from_rgb(55, 55, 55),
         bg_selected: egui::Color32 = egui::Color32::from_rgb(0, 122, 204),
 
-        text_primary: egui::Color32 = egui::Color32::from_rgb(112, 212, 212),
+        text_primary: egui::Color32 = egui::Color32::from_rgb(255, 255, 255),
         text_secondary: egui::Color32 = egui::Color32::from_rgb(170, 170, 170),
         text_tertiary: egui::Color32 = egui::Color32::from_rgb(130, 130, 130),
         text_disabled: egui::Color32 = egui::Color32::from_rgb(100, 100, 100),
