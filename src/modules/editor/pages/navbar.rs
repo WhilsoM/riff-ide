@@ -1,17 +1,19 @@
-use crate::core::lib::rsx::component::Element;
+use crate::core::lib::on_click;
+use crate::core::types::types::Element;
 use crate::core::ui::ui_kit::{Button, Style, StyleSheet, View};
 use crate::modules::editor::components::BottomPanel;
 use crate::modules::editor::stores::theme_store;
-use crate::rsx;
+use crate::{on_click, rsx};
 use riff_rsx_macro::component;
 use std::rc::Rc;
 
 #[component]
 pub fn Navbar(ctx: eframe::egui::Context) -> Element {
     let theme = theme_store();
-    let settings_handler = Rc::new(|| {
+
+    fn settings_handler() {
         println!("Settings clicked");
-    });
+    }
 
     let navbar_style = StyleSheet::new().with(
         "navbar",
@@ -32,7 +34,7 @@ pub fn Navbar(ctx: eframe::egui::Context) -> Element {
                     children: {
                         Button {
                             text: "Settings".to_string(),
-                            on_click: Some(settings_handler),
+                            on_click: Some(on_click!(settings_handler)),
                         }
                     }
                 }

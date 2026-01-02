@@ -1,5 +1,4 @@
-use crate::core::models::{Entry, EntryRc};
-use crate::core::utils::utils::read_current_folder;
+use crate::core::{types::types::EntryRc, utils::utils::read_current_folder};
 use std::path::PathBuf;
 
 pub struct FileServicesStore;

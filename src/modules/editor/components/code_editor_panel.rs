@@ -1,9 +1,12 @@
-use crate::core::lib::rsx::component::Element;
-use crate::core::ui::ui_kit::{Button, CentralPanel, ScrollArea, Text, TextEdit, View};
+use crate::core::types::types::Element;
+use crate::core::ui::ui_kit::{
+    Button, CentralPanel, ScrollArea, Style, StyleSheet, Text, TextEdit, View,
+};
 use crate::modules::editor::components::TabsBar;
 use crate::modules::editor::stores::editor::editor_interactions::editor_interactions_store;
 use crate::modules::editor::stores::theme_store;
-use crate::rsx;
+use crate::{on_click, rsx};
+use egui::Color32;
 use riff_rsx_macro::component;
 
 #[component]
@@ -39,10 +42,18 @@ pub fn CodeEditorPanel(ctx: eframe::egui::Context) -> Element {
             }
         }
     } else {
-        use std::rc::Rc;
-        let hint_handler = Rc::new(|| {
+        fn hint_handler() {
             println!("Select a file from the explorer");
-        });
+        }
+        let bg = theme.bg_main_100_style(&ctx);
+
+        let style = StyleSheet::new().with(
+            "no_file_open",
+            Style::new()
+                .flex(1)
+                .height(f32::INFINITY)
+                .background_color(Color32::from_rgb(20, 200, 20)),
+        );
 
         rsx! {
             CentralPanel {
@@ -50,14 +61,14 @@ pub fn CodeEditorPanel(ctx: eframe::egui::Context) -> Element {
                     View {
                         align: "center".to_string(),
                         justify: "center".to_string(),
-                        style: Some(theme.bg_main_100_style(&ctx)),
+                        style: style.get("no_file_open"),
                         children: {
                             Text {
                                 content: "No file open".to_string(),
                             };
                             Button {
                                 text: "Select a file from explorer".to_string(),
-                                on_click: Some(hint_handler),
+                                on_click: Some(on_click!(hint_handler)),
                             }
                         }
                     }

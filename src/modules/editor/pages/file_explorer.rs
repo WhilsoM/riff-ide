@@ -11,7 +11,7 @@ use crate::modules::editor::stores::context::get_theme;
 use crate::modules::editor::stores::{
     EditorStores, FileActionsStore, FileInteractionsStore, theme_store,
 };
-use crate::rsx;
+use crate::{on_click, rsx};
 
 pub struct FileExplorer {
     files: Rc<RefCell<Vec<Entry>>>,
@@ -30,21 +30,18 @@ impl FileExplorer {
     }
 
     pub fn render(&self, ctx: &egui::Context) {
-        let refresh_handler = {
-            let stores = self.stores.clone();
-            let ctx = ctx.clone();
-            Rc::new(move || {
-                stores.file_actions.borrow().refresh_files(&ctx);
-            })
-        };
+        let stores_refresh_handler = self.stores.clone();
+        let stores_new_file_handler = self.stores.clone();
+        let ctx_refresh_handler = ctx.clone();
+        let ctx_new_file_handler = ctx.clone();
 
-        let new_file_handler = {
-            let stores = self.stores.clone();
-            let ctx = ctx.clone();
-            Rc::new(move || {
-                stores.file_actions.borrow().create_new_file(&ctx);
-            })
-        };
+        fn refresh_handler(stores: Rc<EditorStores>, ctx: egui::Context) {
+            stores.file_actions.borrow().refresh_files(&ctx);
+        }
+
+        fn new_file_handler(stores: Rc<EditorStores>, ctx: egui::Context) {
+            stores.file_actions.borrow().create_new_file(&ctx);
+        }
 
         let inner_view = rsx! {
                 View {
@@ -62,11 +59,11 @@ impl FileExplorer {
                             children: {
                                 Button {
                                     text: "Refresh".to_string(),
-                                    on_click: Some(refresh_handler),
+                                    on_click: Some(on_click!(refresh_handler, stores_refresh_handler, ctx_refresh_handler)),
                                 };
                                 Button {
                                     text: "New File".to_string(),
-                                    on_click: Some(new_file_handler),
+                                    on_click: Some(on_click!(new_file_handler, stores_new_file_handler, ctx_new_file_handler)),
                                 }
                             }
                         };

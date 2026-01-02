@@ -7,10 +7,7 @@ use std::{
 
 use eframe::egui;
 
-use crate::core::{
-    enums::enums::FileType,
-    models::{Entry, EntryRc},
-};
+use crate::core::{enums::enums::FileType, models::Entry, types::types::EntryRc};
 
 // СКОРЕЕ ВСЕГО ЧТО ТО С ЭТОЙ ФУНКЦИЕЙ ИЛИ ОТОБРАЖЕНИЕМ В КОМПОНЕНТЕ ПОСМОТРЕТЬ fileList and FileTreeItem
 /// читать текущую директорию

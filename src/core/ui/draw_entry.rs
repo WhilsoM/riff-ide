@@ -2,8 +2,8 @@ use eframe::egui::{self};
 
 use crate::core::{
     enums::enums::{FileType, Icon, UiAction},
-    models::EntryRc,
     stores::icons::IconsInteractionsStore,
+    types::types::EntryRc,
     utils::utils::read_current_folder,
 };
 pub fn draw_entry(

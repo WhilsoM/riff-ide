@@ -1,4 +1,5 @@
 use crate::core::lib::rsx::component::{Children, Component, ComponentWithProps};
+use crate::core::types::types::Handler;
 use crate::core::ui::ui_kit::style::Style;
 use eframe::egui;
 use std::rc::Rc;
@@ -48,7 +49,7 @@ pub struct SelectableLabelProps {
     /// });
     /// on_click: Some(handler)
     /// ```
-    pub on_click: Option<Rc<dyn Fn()>>,
+    pub on_click: Option<Handler>,
     /// Optional background color when hovering over the label.
     ///
     /// Example:

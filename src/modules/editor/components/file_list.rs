@@ -1,11 +1,5 @@
-use std::cell::RefCell;
-use std::path::PathBuf;
-use std::rc::Rc;
-
 use crate::core::lib::rsx::component::Children;
-use crate::core::lib::rsx::component::Element;
-use crate::core::models::Entry;
-use crate::core::models::EntryRc;
+use crate::core::types::types::Element;
 use crate::core::ui::ui_kit::View;
 use crate::modules::editor::components::file_tree_item::FileTreeItem;
 use crate::modules::editor::stores::context::get_files;

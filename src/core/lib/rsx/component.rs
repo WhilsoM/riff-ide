@@ -1,11 +1,10 @@
 use eframe::egui;
-use std::rc::Rc;
+
+use crate::core::types::types::Element;
 
 pub trait Component {
     fn render(&self, ui: &mut egui::Ui);
 }
-
-pub type Element = Rc<dyn Component>;
 
 pub struct RenderContext<'a> {
     pub ui: &'a mut egui::Ui,

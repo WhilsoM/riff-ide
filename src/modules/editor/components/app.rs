@@ -1,5 +1,5 @@
 use crate::core::lib::rsx::component::ComponentWrapper;
-use crate::core::lib::rsx::component::Element;
+use crate::core::types::types::Element;
 use crate::modules::editor::components::{CodeEditorPanel, FileExplorerPanel, Navbar};
 use riff_rsx_macro::component;
 use std::rc::Rc;

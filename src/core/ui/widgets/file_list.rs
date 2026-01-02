@@ -5,8 +5,8 @@ use std::rc::Rc;
 use crate::core::enums::enums::{FileType, Icon, UiAction};
 use crate::core::lib::rsx::ComponentWrapper;
 use crate::core::lib::rsx::component::Component;
-use crate::core::models::EntryRc;
 use crate::core::stores::icons::IconsInteractionsStore;
+use crate::core::types::types::EntryRc;
 use crate::core::utils::utils::read_current_folder;
 
 #[allow(non_snake_case)]

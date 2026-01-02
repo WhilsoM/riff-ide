@@ -5,7 +5,13 @@ edition = "2024"
 
 [dependencies]
 eframe = "0.33.3"
+egui = "0.33.3"
+muda = "0.17.1"
 image = "0.25.9"
 syn = { version = "2.0", features = ["full"] }
 quote = "1.0"
 riff-rsx-macro = { path = "rsx-macro" }
+cocoa = "0.26.1"
+objc2 = "0.6.3"
+objc2-app-kit = {version = "0.3.2", features = ["NSMenu"]}
+objc2-foundation = "0.3.2"

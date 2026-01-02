@@ -5,13 +5,13 @@ use std::rc::Rc;
 use eframe::egui;
 
 use crate::core::enums::enums::{Hotkeys, UiAction};
-use crate::core::models::EntryRc;
 use crate::core::stores::app_name_store::AppNameStore;
 use crate::core::stores::icons::IconsInteractionsStore;
+use crate::core::types::types::EntryRc;
 use crate::core::ui::ui_kit::render_app;
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::editor::components::App;
-use crate::modules::editor::stores::hotkeys::{HotkeysInteractionsStore, hotkeys_interactions};
+use crate::modules::editor::stores::hotkeys::HotkeysInteractionsStore;
 use crate::modules::editor::stores::{
     EditorInteractionsStore, FileActionsStore, FileInteractionsStore, ThemeInteractionsStore,
 };
@@ -65,7 +65,25 @@ impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let toggle_explorer = ctx.input(|i| i.modifiers.mac_cmd && i.key_pressed(egui::Key::B));
         println!("Toggle explorer hotkey pressed: {}", toggle_explorer);
-
+        // TODO: FOR WINDOWS ONLY
+        // egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+        //     egui::menu::bar(ui, |ui| {
+        //         // Add a "File" menu
+        //         ui.menu_button("File", |ui| if ui.button("Quit").clicked() {});
+        //         // Add an "Edit" menu
+        //         ui.menu_button("Edit", |ui| {
+        //             if ui.button("Cut").clicked() {
+        //                 // Implement cut logic
+        //             }
+        //             if ui.button("Copy").clicked() {
+        //                 // Implement copy logic
+        //             }
+        //             if ui.button("Paste").clicked() {
+        //                 // Implement paste logic
+        //             }
+        //         });
+        //     });
+        // });
         if toggle_explorer {
             self.pending_actions.push(Hotkeys::ToggleExplorer);
         }

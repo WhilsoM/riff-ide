@@ -1,11 +1,12 @@
 use std::rc::Rc;
 
+use crate::core::lib::on_click;
 use crate::core::lib::rsx::Children;
-use crate::core::lib::rsx::component::Element;
+use crate::core::types::types::Element;
 use crate::core::ui::ui_kit::style::{Align, Display, FlexDirection, Justify};
 use crate::core::ui::ui_kit::{Button, Style, StyleSheet, Text, View};
 use crate::modules::editor::stores::{Tab, editor_interactions_store, theme_store};
-use crate::rsx;
+use crate::{on_click, rsx};
 use riff_rsx_macro::component;
 
 #[component]
@@ -26,19 +27,16 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
 
     let is_active = editor_interactions.active_tab_index.get(&ctx) == Some(index);
 
-    let click_handler = {
-        let ctx = ctx.clone();
-        Rc::new(move || {
-            editor_interactions_store().set_active_tab(&ctx, tab_index);
-        })
-    };
+    let ctx_click_handler = ctx.clone();
+    let ctx_close_handler = ctx.clone();
 
-    let close_handler = {
-        let ctx = ctx.clone();
-        Rc::new(move || {
-            editor_interactions_store().close_tab(&ctx, tab_index);
-        })
-    };
+    fn click_handler(ctx: egui::Context, tab_index: usize) {
+        editor_interactions_store().set_active_tab(&ctx, tab_index);
+    }
+
+    fn close_handler(ctx: egui::Context, tab_index: usize) {
+        editor_interactions_store().close_tab(&ctx, tab_index);
+    }
 
     let tab_bg_color = if is_active {
         theme.bg_main_100.get(&ctx)
@@ -96,7 +94,7 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
                     };
                     Button {
                         text: "×".to_string(),
-                        on_click: Some(close_handler),
+                        on_click: Some(on_click!(close_handler, ctx_close_handler, tab_index)),
                         style: s.get("btn"),
                         enabled: true,
                     }
@@ -117,14 +115,14 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
                         children: {
                             Button {
                                 text: file_name.clone(),
-                                on_click: Some(click_handler),
+                                on_click: Some(on_click!(click_handler, ctx_click_handler, tab_index)),
                                 enabled: true,
                             }
                         }
                     };
                     Button {
                         text: "×".to_string(),
-                        on_click: Some(close_handler),
+                        on_click: Some(on_click!(close_handler, ctx, tab_index)),
                         style: s.get("btn"),
                         enabled: true,
                     }

@@ -10,7 +10,7 @@ use crate::core::ui::ui_kit::{
 use eframe::egui;
 
 use crate::modules::editor::stores::theme_store;
-use crate::rsx;
+use crate::{on_click, rsx};
 
 pub struct CodeEditor {
     opened_file: Option<PathBuf>,
@@ -80,9 +80,9 @@ impl CodeEditor {
 
             render_central_panel(ctx, editor_view);
         } else {
-            let hint_handler = Rc::new(|| {
+            fn hint_handler() {
                 println!("Select a file from the explorer");
-            });
+            }
 
             let theme = theme_store();
             let theme_style_100 = theme.bg_main_100_style(ctx);
@@ -99,7 +99,7 @@ impl CodeEditor {
                                 };
                                 Button {
                                     text: "Select a file from explorer".to_string(),
-                                    on_click: Some(hint_handler),
+                                    on_click: Some(on_click!(hint_handler)),
                                 }
                             }
                         }

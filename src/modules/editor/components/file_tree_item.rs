@@ -1,17 +1,17 @@
+use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::core::enums::enums::{FileType, Icon};
 use crate::core::lib::rsx::component::Children;
-use crate::core::lib::rsx::component::Element;
-use crate::core::models::EntryRc;
+
+use crate::core::types::types::{Element, EntryRc};
 use crate::core::ui::ui_kit::StyleSheet;
 use crate::core::ui::ui_kit::style::{Align, FlexDirection, Style};
-use crate::core::ui::ui_kit::{Image, SelectableLabel, Spacer, View};
+use crate::core::ui::ui_kit::{Image, SelectableLabel, View};
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::editor::stores::context::{get_file_interactions, get_icons};
 use crate::modules::editor::stores::theme_store;
-use crate::rsx;
-use eframe::egui::style;
+use crate::{on_click, rsx};
 use riff_rsx_macro::component;
 
 #[component]
@@ -19,7 +19,6 @@ pub fn FileTreeItem(entry: EntryRc, indent: usize, ctx: eframe::egui::Context) -
     let icons = get_icons();
     let theme = theme_store();
     let interactions = get_file_interactions();
-    let entry_clone = entry.clone();
 
     let (icon_texture, name, ftype, path) = {
         let entry_borrowed = entry.borrow();
@@ -40,37 +39,35 @@ pub fn FileTreeItem(entry: EntryRc, indent: usize, ctx: eframe::egui::Context) -
         (icon_texture, name, ftype, path)
     };
 
-    let ctx_for_handler = ctx.clone();
+    fn click_handler(
+        entry: EntryRc,
+        path: std::path::PathBuf,
+        ftype: FileType,
+        interactions: Rc<RefCell<crate::modules::editor::stores::FileInteractionsStore>>,
+        ctx_for_handler: eframe::egui::Context,
+    ) {
+        let mut entry = entry.borrow_mut();
 
-    let click_handler = {
-        let entry = entry_clone.clone();
-        let path_clone = path.clone();
-        let ftype_clone = ftype.clone();
+        match ftype {
+            FileType::Folder => {
+                entry.is_open = !entry.is_open;
 
-        Rc::new(move || {
-            let mut entry = entry.borrow_mut();
-
-            match ftype_clone {
-                FileType::Folder => {
-                    entry.is_open = !entry.is_open;
-
-                    if entry.is_open && entry.children.is_empty() {
-                        entry.children = read_current_folder(&path_clone);
-                        println!(
-                            "ЗАГРУЖЕННЫЕ ДЕТИ ДЛЯ ПАПКИ {:?}: {:?}, {}",
-                            path_clone, entry.children, entry.is_open
-                        );
-                    }
+                if entry.is_open && entry.children.is_empty() {
+                    entry.children = read_current_folder(&path);
+                    println!(
+                        "ЗАГРУЖЕННЫЕ ДЕТИ ДЛЯ ПАПКИ {:?}: {:?}, {}",
+                        path, entry.children, entry.is_open
+                    );
                 }
-                FileType::File => {
-                    interactions
-                        .borrow_mut()
-                        .handle_file_click(&ctx_for_handler, &path_clone);
-                }
-                _ => {}
             }
-        })
-    };
+            FileType::File => {
+                interactions
+                    .borrow_mut()
+                    .handle_file_click(&ctx_for_handler, &path);
+            }
+            _ => {}
+        }
+    }
 
     let styles = StyleSheet::new()
         .with(
@@ -121,7 +118,14 @@ pub fn FileTreeItem(entry: EntryRc, indent: usize, ctx: eframe::egui::Context) -
                             text: name.clone(),
                             text_color: Some(theme.text_primary.get(&ctx)),
                             hover_color: Some(theme.bg_hover.get(&ctx)),
-                            on_click: Some(click_handler.clone()),
+                            on_click: Some(on_click!(
+                                click_handler,
+                                entry.clone(),
+                                path.clone(),
+                                ftype.clone(),
+                                interactions.clone(),
+                                ctx.clone()
+                            )),
                           };
                         }
                       }

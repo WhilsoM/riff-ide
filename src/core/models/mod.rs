@@ -1,8 +1,6 @@
-use std::{cell::RefCell, path::PathBuf, rc::Rc};
+use std::path::PathBuf;
 
-use crate::core::enums::enums::FileType;
-
-pub type EntryRc = Rc<RefCell<Entry>>;
+use crate::core::{enums::enums::FileType, types::types::EntryRc};
 
 #[derive(Clone, Debug)]
 pub struct Entry {

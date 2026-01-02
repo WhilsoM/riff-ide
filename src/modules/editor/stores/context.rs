@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::core::models::{Entry, EntryRc};
 use crate::core::stores::icons::IconsInteractionsStore;
+use crate::core::types::types::EntryRc;
 use crate::modules::editor::stores::hotkeys::HotkeysInteractionsStore;
 use crate::modules::editor::stores::{
     EditorInteractionsStore, FileActionsStore, FileInteractionsStore, ThemeInteractionsStore,

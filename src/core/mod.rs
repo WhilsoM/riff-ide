@@ -4,5 +4,6 @@ pub mod enums;
 pub mod lib;
 pub mod models;
 pub mod stores;
+pub mod types;
 pub mod ui;
 pub mod utils;

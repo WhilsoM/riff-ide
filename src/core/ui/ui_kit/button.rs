@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use crate::core::{
     lib::rsx::component::{Children, Component, ComponentWithProps},
+    types::types::Handler,
     ui::ui_kit::Style,
 };
 use eframe::egui;
@@ -40,7 +41,7 @@ pub struct ButtonProps {
     /// });
     /// on_click: Some(handler)
     /// ```
-    pub on_click: Option<std::rc::Rc<dyn Fn()>>,
+    pub on_click: Option<Handler>,
     /// Child components (rarely used for Button).
     pub children: Children,
     /// Whether the button is enabled (clickable).
