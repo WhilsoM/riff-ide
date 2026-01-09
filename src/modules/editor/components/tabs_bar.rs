@@ -1,11 +1,10 @@
 use std::rc::Rc;
 
-use crate::core::lib::on_click;
 use crate::core::lib::rsx::Children;
 use crate::core::types::types::Element;
 use crate::core::ui::ui_kit::style::{Align, Display, FlexDirection, Justify};
 use crate::core::ui::ui_kit::{Button, Style, StyleSheet, Text, View};
-use crate::modules::editor::stores::{Tab, editor_interactions_store, theme_store};
+use crate::modules::editor::stores::{editor_interactions_store, theme_store, Tab};
 use crate::{on_click, rsx};
 use riff_rsx_macro::component;
 

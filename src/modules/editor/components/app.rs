@@ -11,6 +11,5 @@ pub fn App(ctx: eframe::egui::Context) -> Element {
     let _editor = CodeEditorPanel(ctx.clone());
 
     println!("[DEBUG] App: all components created");
-
     Rc::new(ComponentWrapper::new(|_ui: &mut eframe::egui::Ui| {})) as Element
 }

@@ -45,14 +45,13 @@ pub fn CodeEditorPanel(ctx: eframe::egui::Context) -> Element {
         fn hint_handler() {
             println!("Select a file from the explorer");
         }
-        let bg = theme.bg_main_100_style(&ctx);
 
         let style = StyleSheet::new().with(
             "no_file_open",
             Style::new()
                 .flex(1)
                 .height(f32::INFINITY)
-                .background_color(Color32::from_rgb(20, 200, 20)),
+                .background_color(Color32::from_rgb(25, 25, 25)),
         );
 
         rsx! {

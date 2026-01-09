@@ -6,7 +6,7 @@ use crate::store;
 
 store! {
     pub struct ThemeInteractionsStore {
-        bg_main_100: egui::Color32 = egui::Color32::from_rgb(20, 20, 20),
+        bg_main_100: egui::Color32 = egui::Color32::from_rgb(25, 25, 25),
         bg_main_200: egui::Color32 = egui::Color32::from_rgb(25, 25, 25),
         bg_main_300: egui::Color32 = egui::Color32::from_rgb(30, 30, 30),
         bg_hover: egui::Color32 = egui::Color32::from_rgb(45, 45, 45),
