@@ -1,5 +1,5 @@
+pub mod app;
 pub mod context;
-pub mod core;
 pub mod enums;
 pub mod lib;
 pub mod models;

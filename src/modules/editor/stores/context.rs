@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use crate::core::stores::global_store::GlobalStore;
 use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::types::types::EntryRc;
 use crate::modules::editor::stores::hotkeys::HotkeysInteractionsStore;
@@ -16,6 +17,7 @@ thread_local! {
     static ICONS: RefCell<Option<Rc<IconsInteractionsStore>>> = RefCell::new(None);
     static FILES: RefCell<Option<Rc<RefCell<Vec<EntryRc>>>>> = RefCell::new(None);
     static HOTKEYS_INTERACTIONS: RefCell<Option<Rc<RefCell<HotkeysInteractionsStore>>>> = RefCell::new(None);
+    static GLOBAL_STORE: RefCell<Option<Rc<RefCell<GlobalStore>>>> = RefCell::new(None);
 }
 
 pub fn set_editor_interactions(store: Rc<RefCell<EditorInteractionsStore>>) {
@@ -91,11 +93,20 @@ pub fn get_files() -> Rc<RefCell<Vec<EntryRc>>> {
     FILES.with(|s| s.borrow().as_ref().expect("Files not initialized").clone())
 }
 
-pub fn hotkeys_interactions() -> Rc<RefCell<HotkeysInteractionsStore>> {
+pub fn get_hotkeys_interactions() -> Rc<RefCell<HotkeysInteractionsStore>> {
     HOTKEYS_INTERACTIONS.with(|s| {
         s.borrow()
             .as_ref()
             .expect("hotkeys interactions not initialized")
+            .clone()
+    })
+}
+
+pub fn get_global_store() -> Rc<RefCell<GlobalStore>> {
+    GLOBAL_STORE.with(|s| {
+        s.borrow()
+            .as_ref()
+            .expect("global store not initialized")
             .clone()
     })
 }
@@ -108,6 +119,7 @@ pub struct AppStores {
     pub icons: Rc<IconsInteractionsStore>,
     pub files: Rc<RefCell<Vec<EntryRc>>>,
     pub hotkeys_interactions: Rc<RefCell<HotkeysInteractionsStore>>,
+    pub global_store: Rc<RefCell<GlobalStore>>,
 }
 
 pub fn set_all_stores(stores: AppStores) {

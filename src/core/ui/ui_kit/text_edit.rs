@@ -48,6 +48,8 @@ pub struct TextEditProps {
     pub font: Option<String>,
     /// Child components (rarely used for TextEdit).
     pub children: Children,
+    /// Change font size
+    pub font_size: Option<f32>,
 }
 
 impl TextEdit {
@@ -79,15 +81,13 @@ impl Component for TextEdit {
         let mut text = self.props.value.borrow_mut();
 
         if self.props.multiline {
-            let text_edit = if let Some(font_name) = &self.props.font {
-                if font_name == "monospace" {
-                    egui::TextEdit::multiline(&mut *text).font(egui::TextStyle::Monospace)
-                } else {
-                    egui::TextEdit::multiline(&mut *text)
-                }
-            } else {
-                egui::TextEdit::multiline(&mut *text)
-            };
+            let mut text_edit = egui::TextEdit::multiline(&mut *text);
+
+            if let Some(size) = self.props.font_size {
+                text_edit = text_edit.font(egui::FontId::monospace(size));
+            } else if let Some(font_name) = &self.props.font && font_name == "monospace" {
+                    text_edit = text_edit.font(egui::TextStyle::Monospace);
+            }
 
             ui.add_sized([ui.available_width(), ui.available_height()], text_edit);
         } else {

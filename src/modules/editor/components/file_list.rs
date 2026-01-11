@@ -1,6 +1,7 @@
 use crate::core::lib::rsx::component::Children;
 use crate::core::types::types::Element;
-use crate::core::ui::ui_kit::View;
+use crate::core::ui::ui_kit::style::{Align, Justify};
+use crate::core::ui::ui_kit::{Style, StyleSheet, View};
 use crate::modules::editor::components::file_tree_item::FileTreeItem;
 use crate::modules::editor::stores::context::get_files;
 use crate::rsx;
@@ -16,10 +17,14 @@ pub fn FileList(ctx: eframe::egui::Context) -> Element {
         .map(|entry_rc| FileTreeItem(entry_rc.clone(), 0, ctx.clone()))
         .collect();
 
+    let s = StyleSheet::new().with(
+        "center",
+        Style::new().justify(Justify::Start).align(Align::Start),
+    );
+
     rsx! {
         View {
-            align: "start".to_string(),
-            justify: "start".to_string(),
+            style: s.get("center"),
             children: Children::Multiple(children),
         }
     }

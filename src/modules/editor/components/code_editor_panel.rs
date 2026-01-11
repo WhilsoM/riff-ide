@@ -1,4 +1,8 @@
+use core::f32;
+
+use crate::core::stores::global_store::global_store;
 use crate::core::types::types::Element;
+use crate::core::ui::ui_kit::style::{Align, Justify};
 use crate::core::ui::ui_kit::{
     Button, CentralPanel, ScrollArea, Style, StyleSheet, Text, TextEdit, View,
 };
@@ -13,17 +17,25 @@ use riff_rsx_macro::component;
 pub fn CodeEditorPanel(ctx: eframe::egui::Context) -> Element {
     let editor_interactions = editor_interactions_store();
     let theme = theme_store();
+    let current_font_size = global_store().get_font_size().get(&ctx);
+
     let current_path = editor_interactions.get_current_tab_path(&ctx);
     let text_value = editor_interactions.get_current_tab_text_ref(&ctx);
+
+    let s = StyleSheet::new().with(
+        "start",
+        Style::new()
+            .justify(Justify::Start)
+            .align(Align::Start)
+            .background_color(theme.bg_main_100.get(&ctx)),
+    );
 
     if let (Some(_path), Some(text_ref)) = (current_path, text_value) {
         rsx! {
             CentralPanel {
                 children: {
                     View {
-                        align: "start".to_string(),
-                        justify: "start".to_string(),
-                        style: Some(theme.bg_main_100_style(&ctx)),
+                        style: s.get("start"),
                         children: {
                             TabsBar(ctx.clone());
                             ScrollArea {
@@ -33,6 +45,7 @@ pub fn CodeEditorPanel(ctx: eframe::egui::Context) -> Element {
                                         value: text_ref.clone(),
                                         multiline: true,
                                         font: Some("monospace".to_string()),
+                                        font_size: Some(current_font_size),
                                     }
                                 }
                             }
@@ -51,15 +64,15 @@ pub fn CodeEditorPanel(ctx: eframe::egui::Context) -> Element {
             Style::new()
                 .flex(1)
                 .height(f32::INFINITY)
-                .background_color(Color32::from_rgb(25, 25, 25)),
+                .background_color(Color32::from_rgb(225, 25, 25))
+                .justify(Justify::Center)
+                .align(Align::Center),
         );
 
         rsx! {
             CentralPanel {
                 children: {
                     View {
-                        align: "center".to_string(),
-                        justify: "center".to_string(),
                         style: style.get("no_file_open"),
                         children: {
                             Text {

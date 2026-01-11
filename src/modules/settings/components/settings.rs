@@ -18,17 +18,7 @@ use crate::{
 pub fn Settings(ctx: egui::Context) -> Element {
     let theme = theme_store();
 
-    // let settings_style = StyleSheet::new().with(
-    //     "main_settings",
-    //     Style::new()
-    //         .padding(20.0)
-    //         .background_color(theme.bg_main_100.get(&ctx))
-    //         .width(400.0)
-    //         .height(300.0)
-    //         .border_radius(8.0)
-    //         .border_width(1.0)
-    //         .border_color(theme.border_primary.get(&ctx)),
-    // );
+    let settings_style = StyleSheet::new().with("main_settings", Style::new());
 
     rsx! {
        View {

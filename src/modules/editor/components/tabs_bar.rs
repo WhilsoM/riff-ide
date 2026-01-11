@@ -1,8 +1,6 @@
-use std::rc::Rc;
-
 use crate::core::lib::rsx::Children;
 use crate::core::types::types::Element;
-use crate::core::ui::ui_kit::style::{Align, Display, FlexDirection, Justify};
+use crate::core::ui::ui_kit::style::{Align, Display, FlexDirection, Justify, Overflow};
 use crate::core::ui::ui_kit::{Button, Style, StyleSheet, Text, View};
 use crate::modules::editor::stores::{editor_interactions_store, theme_store, Tab};
 use crate::{on_click, rsx};
@@ -56,22 +54,32 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
                 .border_width(1.0)
                 .border_color(theme.bg_main_300.get(&ctx)),
         )
-        .with("tab_text", Style::new().flex_direction(FlexDirection::Row))
+        .with(
+            "tab_text",
+            Style::new()
+                .flex_direction(FlexDirection::Row)
+                .justify(Justify::Center)
+                .align(Align::Center),
+        )
         .with(
             "btn",
             Style::new()
                 .background_color(tab_bg_color)
                 .border_color(theme.border_primary.get(&ctx)),
+        )
+        .with(
+            "dirty_circle",
+            Style::new()
+                .width(8.0)
+                .height(8.0)
+                .border_radius(4.0)
+                .background_color(theme.accent_primary.get(&ctx))
+                .margin(4.0),
+        )
+        .with(
+            "center",
+            Style::new().justify(Justify::Start).align(Align::Start),
         );
-
-    let dirty_circle_style = Rc::new(
-        Style::new()
-            .width(8.0)
-            .height(8.0)
-            .border_radius(4.0)
-            .background_color(theme.accent_primary.get(&ctx))
-            .margin(4.0),
-    );
 
     if is_dirty {
         rsx! {
@@ -79,15 +87,13 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
                 style: s.get("tab"),
                 children: {
                     View {
-                        align: "center".to_string(),
-                        justify: "center".to_string(),
                         style: s.get("tab_text"),
                         children: {
                             Text {
                                 content: file_name.clone(),
                             };
                             View {
-                                style: Some(dirty_circle_style.clone()),
+                                style: s.get("dirty_circle"),
                             }
                         }
                     };
@@ -104,12 +110,8 @@ fn render_tab(tab: &Tab, index: usize, ctx: eframe::egui::Context) -> Element {
         rsx! {
             View {
                 style: s.get("tab"),
-                align: "center".to_string(),
-                justify: "space-between".to_string(),
                 children: {
                     View {
-                        align: "center".to_string(),
-                        justify: "flex-start".to_string(),
                         style: s.get("tab_text"),
                         children: {
                             Button {
@@ -137,13 +139,19 @@ pub fn TabsBar(ctx: eframe::egui::Context) -> Element {
     let editor_interactions = editor_interactions_store();
     let tabs_vec = editor_interactions.tabs.get(&ctx).clone();
 
-    let tabs_container_style = Style::new()
-        .display(Display::Flex)
-        .flex_direction(FlexDirection::Row)
-        .background_color(theme.bg_main_200.get(&ctx))
-        .height(20.0);
+    let s = StyleSheet::new().with(
+        "tabs_container",
+        Style::new()
+            .display(Display::Flex)
+            .justify(Justify::Start)
+            .align(Align::Start)
+            .flex_direction(FlexDirection::Row)
+            .overflow(Overflow::Scroll)
+            .background_color(theme.bg_main_200.get(&ctx))
+            .height(20.0),
+    );
 
-    let tab_components: Vec<Element> = tabs_vec
+    let tab_components = tabs_vec
         .iter()
         .enumerate()
         .map(|(index, tab)| render_tab(tab, index, ctx.clone()))
@@ -151,9 +159,7 @@ pub fn TabsBar(ctx: eframe::egui::Context) -> Element {
 
     rsx! {
         View {
-            align: "flex-start".to_string(),
-            justify: "flex-start".to_string(),
-            style: Some(Rc::new(tabs_container_style)),
+            style: s.get("tabs_container"),
             children: Children::Multiple(tab_components),
         }
     }

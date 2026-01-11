@@ -1,8 +1,9 @@
 use crate::core::types::types::Element;
 use crate::core::ui::ui_kit::style::{Align, Display, FlexDirection, Justify};
-use crate::core::ui::ui_kit::{Button, Color, Style, StyleSheet, View};
+use crate::core::ui::ui_kit::{Button, Color, Style, StyleSheet, Text, View};
 use crate::modules::editor::components::TopPanel;
 use crate::modules::editor::stores::theme_store;
+use crate::modules::plugins::MOUSE_ENABLED;
 use crate::rsx;
 use riff_rsx_macro::component;
 use std::rc::Rc;
@@ -40,6 +41,12 @@ pub fn Navbar(ctx: eframe::egui::Context) -> Element {
             Style::new().border_width(1.0).border_color(Color::RED),
         );
 
+    if unsafe { MOUSE_ENABLED } {
+        println!("MOUSE ENABLED")
+    } else {
+        println!("MOUSE DISABLED");
+    }
+
     rsx! {
         TopPanel {
             id: "navbar".to_string(),
@@ -53,7 +60,7 @@ pub fn Navbar(ctx: eframe::egui::Context) -> Element {
                         Button {
                             text: "Settings".to_string(),
                             on_click: Some(settings_handler),
-                        }
+                        };
                     }
                 }
             }

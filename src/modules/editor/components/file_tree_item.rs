@@ -5,8 +5,8 @@ use crate::core::enums::enums::{FileType, Icon};
 use crate::core::lib::rsx::component::Children;
 
 use crate::core::types::types::{Element, EntryRc};
+use crate::core::ui::ui_kit::style::{Align, FlexDirection, Justify, Style};
 use crate::core::ui::ui_kit::StyleSheet;
-use crate::core::ui::ui_kit::style::{Align, FlexDirection, Style};
 use crate::core::ui::ui_kit::{Image, SelectableLabel, View};
 use crate::core::utils::utils::read_current_folder;
 use crate::modules::editor::stores::context::{get_file_interactions, get_icons};
@@ -74,7 +74,9 @@ pub fn FileTreeItem(entry: EntryRc, indent: usize, ctx: eframe::egui::Context) -
             "container",
             Style::new()
                 .padding_horizontal(10.0)
-                .flex_direction(FlexDirection::Column),
+                .flex_direction(FlexDirection::Column)
+                .justify(Justify::Start)
+                .align(Align::Start),
         )
         .with(
             "item",
@@ -100,8 +102,6 @@ pub fn FileTreeItem(entry: EntryRc, indent: usize, ctx: eframe::egui::Context) -
 
     rsx! {
         View {
-            align: "start".to_string(),
-            justify: "start".to_string(),
             style: styles.get("container"),
             children: Children::Multiple({
                 let mut ch = vec![

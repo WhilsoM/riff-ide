@@ -6,6 +6,7 @@ use eframe::egui;
 
 use crate::core::enums::enums::{Hotkeys, UiAction};
 use crate::core::stores::app_name_store::AppNameStore;
+use crate::core::stores::global_store::{global_store, GlobalStore};
 use crate::core::stores::icons::IconsInteractionsStore;
 use crate::core::types::types::EntryRc;
 use crate::core::ui::ui_kit::render_app;
@@ -27,6 +28,7 @@ pub struct MyApp {
     hotkeys_interactions: Rc<RefCell<HotkeysInteractionsStore>>,
     theme: Rc<ThemeInteractionsStore>,
     pending_actions: Vec<Hotkeys>,
+    global_store: Rc<RefCell<GlobalStore>>,
 }
 
 impl MyApp {
@@ -43,8 +45,8 @@ impl MyApp {
         let file_interactions = Rc::new(RefCell::new(FileInteractionsStore::new()));
         let editor_interactions = Rc::new(RefCell::new(EditorInteractionsStore::new()));
         let theme = Rc::new(ThemeInteractionsStore::new());
-
         let hotkeys_interactions = Rc::new(RefCell::new(HotkeysInteractionsStore::new()));
+        let global_store = Rc::new(RefCell::new(GlobalStore::new()));
 
         Self {
             current_dir,
@@ -57,45 +59,32 @@ impl MyApp {
             theme,
             hotkeys_interactions,
             pending_actions: Vec::new(),
+            global_store,
         }
     }
 }
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let toggle_explorer = ctx.input(|i| i.modifiers.mac_cmd && i.key_pressed(egui::Key::B));
-        println!("Toggle explorer hotkey pressed: {}", toggle_explorer);
-        // TODO: FOR WINDOWS ONLY
-        // egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-        //     egui::menu::bar(ui, |ui| {
-        //         // Add a "File" menu
-        //         ui.menu_button("File", |ui| if ui.button("Quit").clicked() {});
-        //         // Add an "Edit" menu
-        //         ui.menu_button("Edit", |ui| {
-        //             if ui.button("Cut").clicked() {
-        //                 // Implement cut logic
-        //             }
-        //             if ui.button("Copy").clicked() {
-        //                 // Implement copy logic
-        //             }
-        //             if ui.button("Paste").clicked() {
-        //                 // Implement paste logic
-        //             }
-        //         });
-        //     });
-        // });
-        if toggle_explorer {
-            self.pending_actions.push(Hotkeys::ToggleExplorer);
-        }
+        let delta = ctx.input(|i| i.raw_scroll_delta.y);
 
-        // CLEAR PENDING ACTIONS
-        for action in self.pending_actions.drain(..) {
-            match action {
-                Hotkeys::ToggleExplorer => {
-                    self.hotkeys_interactions.borrow_mut().toggle_explorer(ctx);
-                }
-                _ => {}
-            }
+        // change font size
+        if ctx.input(|i| i.modifiers.command) && delta != 0.0 {
+            let font_size_field = global_store().get_font_size();
+
+            let current_size = font_size_field.get(ctx);
+
+            let step = 0.5;
+            let mut new_size = if delta > 0.0 {
+                current_size + step
+            } else {
+                current_size - step
+            };
+
+            new_size = new_size.clamp(8.0, 72.0);
+            font_size_field.set(new_size);
+
+            global_store().change_font_size(ctx, new_size);
         }
 
         use crate::modules::editor::stores::theme_store;
@@ -126,7 +115,7 @@ impl eframe::App for MyApp {
             editor_interactions_store().open_tab(ctx, path);
         }
 
-        use crate::modules::editor::stores::context::{AppStores, set_all_stores};
+        use crate::modules::editor::stores::context::{set_all_stores, AppStores};
 
         let files_rc = Rc::new(RefCell::new(self.files.clone()));
         set_all_stores(AppStores {
@@ -137,6 +126,7 @@ impl eframe::App for MyApp {
             icons: self.icons.clone(),
             files: files_rc.clone(),
             hotkeys_interactions: self.hotkeys_interactions.clone(),
+            global_store: self.global_store.clone(),
         });
 
         let app = App(ctx.clone());

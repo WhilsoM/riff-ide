@@ -1,5 +1,7 @@
+use crate::core::stores::global_store::global_store;
 use crate::core::types::types::Element;
-use crate::core::ui::ui_kit::{Button, Separator, Text, View};
+use crate::core::ui::ui_kit::style::{Align, Justify};
+use crate::core::ui::ui_kit::{Button, Separator, Style, StyleSheet, Text, View};
 use crate::modules::editor::components::{FileList, LeftPanel};
 use crate::modules::editor::stores::file::file_actions::file_actions_store;
 use crate::modules::editor::stores::theme_store;
@@ -9,6 +11,9 @@ use riff_rsx_macro::component;
 #[component]
 pub fn FileExplorerPanel(ctx: egui::Context) -> Element {
     let theme = theme_store();
+    let global_store = global_store();
+    let font_size = global_store.get_font_size();
+
     let ctx_refresh = ctx.clone();
     let ctx_new_file = ctx.clone();
     let ctx_file_list = ctx.clone();
@@ -23,6 +28,19 @@ pub fn FileExplorerPanel(ctx: egui::Context) -> Element {
         file_actions_store().create_new_file(&ctx);
     }
 
+    let s = StyleSheet::new()
+        .with(
+            "center",
+            Style::new().justify(Justify::Start).align(Align::Start),
+        )
+        .with(
+            "file_explorer",
+            Style::new()
+                .justify(Justify::Start)
+                .align(Align::Start)
+                .background_color(theme.bg_main_200.get(&ctx)),
+        );
+
     rsx! {
         LeftPanel {
             id: "file_explorer".to_string(),
@@ -30,18 +48,18 @@ pub fn FileExplorerPanel(ctx: egui::Context) -> Element {
             default_width: Some(250.0),
             children: {
                 View {
-                    align: "start".to_string(),
-                    justify: "start".to_string(),
-                        style: Some(theme.bg_main_200_style(&ctx)),
+                   style: s.get("file_explorer"),
                     children: {
                         Text {
                             content: "Explorer".to_string(),
                         };
                         Separator {};
                         View {
-                            align: "start".to_string(),
-                            justify: "start".to_string(),
+                           style: s.get("center"),
                             children: {
+                                Text {
+                                    content: format!("Current font size: {:?}", font_size.get(&ctx)),
+                                };
                                 Button {
                                     text: "Refresh".to_string(),
                                     on_click: Some(on_click!(refresh_handler, ctx_refresh)),
