@@ -4,7 +4,8 @@ use eframe::egui;
 store! {
   pub struct GlobalStore {
     is_open_settings: bool = false,
-    font_size: f32 = 17.5
+    font_size: f32 = 13.5,
+    is_show_settings: bool = false,
   }
 }
 
@@ -24,6 +25,12 @@ impl GlobalStore {
         println!("CURRENT FONT SIZE: {:?}", self.font_size);
         *reactive.font_size() = size;
         println!("FONT SIZE AFTER CHANGE: {:?}", self.font_size)
+    }
+
+    pub fn change_show_settings(&self, _ctx: &egui::Context) {
+        let mut reactive = self.reactive(_ctx);
+        let current = *reactive.is_show_settings();
+        *reactive.is_show_settings() = !current;
     }
 }
 

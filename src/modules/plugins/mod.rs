@@ -1,32 +1,8 @@
-use std::{fs, path::Path};
-
 use mlua::prelude::*;
 
 use crate::core::stores::global_store::global_store;
 
 pub static mut MOUSE_ENABLED: bool = true;
-
-//pub fn read_extensions_folder() {
-//    let extension_path = Path::new("extensions/");
-//    let paths = fs::read_dir(extension_path).expect("Don't found folder");
-//
-//    for path in paths.flatten() {
-//        // path — это Result, так как при чтении файла может возникнуть ошибка
-//        if let Ok(entry) = path {
-//            let file_path = entry.path();
-//
-//            // Проверяем, что это файл и у него расширение .lua
-//            if file_path.is_file() && file_path.extension().and_then(|s| s.to_str()) == Some("lua")
-//            {
-//                println!("Нашел плагин: {:?}", file_path);
-//
-//                // Вот здесь уже можно читать содержимое конкретного файла
-//                let content = fs::read_to_string(&file_path).expect("Ошибка чтения файла");
-//                // Дальше прокидываешь content в свой Lua-движок
-//            }
-//        }
-//    }
-//}
 
 pub fn run_test_plugin() -> LuaResult<()> {
     let lua = Lua::new();

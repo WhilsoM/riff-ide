@@ -64,7 +64,7 @@ pub fn CodeEditorPanel(ctx: eframe::egui::Context) -> Element {
             Style::new()
                 .flex(1)
                 .height(f32::INFINITY)
-                .background_color(Color32::from_rgb(225, 25, 25))
+                .background_color(Color32::from_rgb(25, 25, 25))
                 .justify(Justify::Center)
                 .align(Align::Center),
         );
